@@ -7,6 +7,8 @@ import 'package:solo_test/screens/home/home_screen.dart';
 import 'package:solo_test/screens/game/game_screen.dart';
 import 'package:solo_test/screens/auth/login_screen.dart';
 import 'package:solo_test/screens/auth/register_screen.dart';
+import 'package:solo_test/screens/rules/rules_screen.dart';
+import 'package:solo_test/screens/settings/settings_screen.dart';
 import 'package:solo_test/services/storage_service.dart';
 import 'package:solo_test/services/auth_service.dart';
 
@@ -57,6 +59,8 @@ class MyApp extends StatelessWidget {
                 },
               ),
           '/home': (context) => const HomeScreen(),
+          '/rules': (context) => const RulesScreen(),
+          '/settings': (context) => const SettingsScreen(),
         },
       ),
     );

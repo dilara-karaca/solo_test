@@ -49,44 +49,51 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           // Background glow orbs
           AnimatedBuilder(
             animation: _pulseAnim,
-            builder: (context, _) => Stack(
-              children: [
-                Positioned(
-                  top: -90,
-                  right: -70,
-                  child: Opacity(
-                    opacity: _pulseAnim.value * 0.45,
-                    child: Container(
-                      width: 300,
-                      height: 300,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: RadialGradient(
-                          colors: [AppColors.primaryColor, Colors.transparent],
+            builder:
+                (context, _) => Stack(
+                  children: [
+                    Positioned(
+                      top: -90,
+                      right: -70,
+                      child: Opacity(
+                        opacity: _pulseAnim.value * 0.45,
+                        child: Container(
+                          width: 300,
+                          height: 300,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: RadialGradient(
+                              colors: [
+                                AppColors.primaryColor,
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 80,
-                  left: -80,
-                  child: Opacity(
-                    opacity: (1.0 - _pulseAnim.value) * 0.35,
-                    child: Container(
-                      width: 220,
-                      height: 220,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: RadialGradient(
-                          colors: [AppColors.accentColor, Colors.transparent],
+                    Positioned(
+                      bottom: 80,
+                      left: -80,
+                      child: Opacity(
+                        opacity: (1.0 - _pulseAnim.value) * 0.35,
+                        child: Container(
+                          width: 220,
+                          height: 220,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: RadialGradient(
+                              colors: [
+                                AppColors.accentColor,
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
           ),
 
           // Main content
@@ -107,11 +114,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           ),
                           const SizedBox(height: 36),
                           ShaderMask(
-                            shaderCallback: (bounds) => const LinearGradient(
-                              colors: [AppColors.primaryLight, AppColors.accentColor],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                            ).createShader(bounds),
+                            shaderCallback:
+                                (bounds) => const LinearGradient(
+                                  colors: [
+                                    AppColors.primaryLight,
+                                    AppColors.accentColor,
+                                  ],
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                ).createShader(bounds),
                             child: Text(
                               'SOLO TEST',
                               style: AppTextStyles.heading1.copyWith(
@@ -131,7 +142,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           ),
                           const SizedBox(height: 52),
                           _PlayButton(
-                            onPressed: () => Navigator.of(context).pushNamed('/game'),
+                            onPressed:
+                                () => Navigator.of(context).pushNamed('/game'),
                           ),
                           const SizedBox(height: 14),
                           Row(
@@ -140,7 +152,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 child: _GlassButton(
                                   icon: Icons.info_outline_rounded,
                                   label: 'KURALLAR',
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    Navigator.of(context).pushNamed('/rules');
+                                  },
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -148,7 +162,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 child: _GlassButton(
                                   icon: Icons.tune_rounded,
                                   label: 'AYARLAR',
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    Navigator.of(
+                                      context,
+                                    ).pushNamed('/settings');
+                                  },
                                 ),
                               ),
                             ],
@@ -193,7 +211,9 @@ class _HeroIcon extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primaryColor.withOpacity(pulseAnim.value * 0.45),
+                      color: AppColors.primaryColor.withOpacity(
+                        pulseAnim.value * 0.45,
+                      ),
                       blurRadius: 50,
                       spreadRadius: 8,
                     ),
@@ -240,7 +260,9 @@ class _HeroIcon extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: AppColors.primaryColor.withOpacity(0.12),
                       border: Border.all(
-                        color: AppColors.primaryColor.withOpacity(0.4 + pulseAnim.value * 0.3),
+                        color: AppColors.primaryColor.withOpacity(
+                          0.4 + pulseAnim.value * 0.3,
+                        ),
                         width: 1.5,
                       ),
                     ),
@@ -273,22 +295,22 @@ class _MiniBoard extends StatelessWidget {
         crossAxisSpacing: 5,
       ),
       itemCount: 9,
-      itemBuilder: (context, i) => Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: cells[i]
-              ? AppColors.primaryColor
-              : AppColors.boardHole,
-          boxShadow: cells[i]
-              ? [
-                  BoxShadow(
-                    color: AppColors.primaryColor.withOpacity(0.5),
-                    blurRadius: 6,
-                  ),
-                ]
-              : null,
-        ),
-      ),
+      itemBuilder:
+          (context, i) => Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: cells[i] ? AppColors.primaryColor : AppColors.boardHole,
+              boxShadow:
+                  cells[i]
+                      ? [
+                        BoxShadow(
+                          color: AppColors.primaryColor.withOpacity(0.5),
+                          blurRadius: 6,
+                        ),
+                      ]
+                      : null,
+            ),
+          ),
     );
   }
 }
