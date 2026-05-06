@@ -1,10 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:solo_test/core/constants/app_colors.dart';
 import 'package:solo_test/core/constants/app_text_styles.dart';
 import 'package:solo_test/services/storage_service.dart';
-import 'package:solo_test/providers/auth_provider.dart';
 
 class StatsBar extends StatefulWidget {
   const StatsBar({super.key});
@@ -98,43 +96,10 @@ class _StatsBarState extends State<StatsBar> {
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(color: AppColors.glassBorder),
                 ),
-                child: PopupMenuButton<String>(
-                  onSelected: (value) async {
-                    if (value == 'logout') {
-                      await context.read<AuthProvider>().logout();
-                      if (context.mounted) {
-                        Navigator.of(context).pushReplacementNamed('/login');
-                      }
-                    }
-                  },
-                  itemBuilder:
-                      (BuildContext context) => [
-                        PopupMenuItem<String>(
-                          value: 'logout',
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.logout,
-                                color: AppColors.errorColor,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Çıkış Yap',
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppColors.errorColor,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                  offset: const Offset(0, 50),
-                  child: const Center(
-                    child: Icon(
-                      Icons.person_rounded,
-                      color: AppColors.primaryLight,
-                    ),
+                child: const Center(
+                  child: Icon(
+                    Icons.person_rounded,
+                    color: AppColors.primaryLight,
                   ),
                 ),
               ),
