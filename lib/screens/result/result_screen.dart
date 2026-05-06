@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:solo_test/core/constants/app_constants.dart';
 import 'package:solo_test/core/constants/app_colors.dart';
 import 'package:solo_test/core/constants/app_text_styles.dart';
 import 'package:solo_test/models/game_result.dart';
@@ -13,6 +14,9 @@ class ResultScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final isWin = result.remainingPieces == 1;
     final heroColor = isWin ? AppColors.warningColor : AppColors.primaryColor;
+    final avatar = AppConstants.getAvatarForRemainingPieces(
+      result.remainingPieces,
+    );
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -28,10 +32,7 @@ class ResultScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
-                  colors: [
-                    heroColor.withOpacity(0.14),
-                    Colors.transparent,
-                  ],
+                  colors: [heroColor.withOpacity(0.14), Colors.transparent],
                 ),
               ),
             ),
@@ -83,18 +84,26 @@ class ResultScreen extends StatelessWidget {
                           ),
                           child: Center(
                             child: Text(
-                              isWin ? '🏆' : '🎮',
+                              avatar,
                               style: const TextStyle(fontSize: 52),
                             ),
                           ),
                         ),
                         const SizedBox(height: 24),
                         ShaderMask(
-                          shaderCallback: (bounds) => LinearGradient(
-                            colors: isWin
-                                ? [AppColors.warningColor, const Color(0xFFFBBF24)]
-                                : [AppColors.primaryLight, AppColors.accentColor],
-                          ).createShader(bounds),
+                          shaderCallback:
+                              (bounds) => LinearGradient(
+                                colors:
+                                    isWin
+                                        ? [
+                                          AppColors.warningColor,
+                                          const Color(0xFFFBBF24),
+                                        ]
+                                        : [
+                                          AppColors.primaryLight,
+                                          AppColors.accentColor,
+                                        ],
+                              ).createShader(bounds),
                           child: Text(
                             result.grade,
                             style: AppTextStyles.heading1.copyWith(
@@ -165,20 +174,31 @@ class ResultScreen extends StatelessWidget {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16),
                               gradient: const LinearGradient(
-                                colors: [AppColors.primaryColor, AppColors.primaryDark],
+                                colors: [
+                                  AppColors.primaryColor,
+                                  AppColors.primaryDark,
+                                ],
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.primaryColor.withOpacity(0.38),
+                                  color: AppColors.primaryColor.withOpacity(
+                                    0.38,
+                                  ),
                                   blurRadius: 18,
                                   offset: const Offset(0, 6),
                                 ),
                               ],
                             ),
                             child: TextButton.icon(
-                              onPressed: () =>
-                                  Navigator.of(context).pushReplacementNamed('/game'),
-                              icon: const Icon(Icons.replay_rounded, color: Colors.white, size: 22),
+                              onPressed:
+                                  () => Navigator.of(
+                                    context,
+                                  ).pushReplacementNamed('/game'),
+                              icon: const Icon(
+                                Icons.replay_rounded,
+                                color: Colors.white,
+                                size: 22,
+                              ),
                               label: const Text(
                                 'TEKRAR OYNA',
                                 style: TextStyle(
@@ -204,11 +224,15 @@ class ResultScreen extends StatelessWidget {
                                   backgroundColor: AppColors.glassColor,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
-                                    side: const BorderSide(color: AppColors.glassBorder),
+                                    side: const BorderSide(
+                                      color: AppColors.glassBorder,
+                                    ),
                                   ),
                                 ),
-                                onPressed: () =>
-                                    Navigator.of(context).pushReplacementNamed('/'),
+                                onPressed:
+                                    () => Navigator.of(
+                                      context,
+                                    ).pushReplacementNamed('/'),
                                 icon: Icon(
                                   Icons.home_outlined,
                                   color: AppColors.textSecondary,
@@ -270,12 +294,7 @@ class _ResultCard extends StatelessWidget {
         color: AppColors.surfaceColor,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.borderLight),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.06),
-            blurRadius: 10,
-          ),
-        ],
+        boxShadow: [BoxShadow(color: color.withOpacity(0.06), blurRadius: 10)],
       ),
       child: Row(
         children: [
@@ -289,9 +308,7 @@ class _ResultCard extends StatelessWidget {
             child: Icon(icon, color: color, size: 18),
           ),
           const SizedBox(width: 14),
-          Expanded(
-            child: Text(label, style: AppTextStyles.labelSmall),
-          ),
+          Expanded(child: Text(label, style: AppTextStyles.labelSmall)),
           Text(
             value,
             style: AppTextStyles.bodyLarge.copyWith(

@@ -1,6 +1,14 @@
 import 'package:solo_test/models/board_state.dart';
 
 class MoveValidator {
+  static List<List<bool>> _createEmptyMoves(BoardState boardState) {
+    final boardSize = boardState.board.length;
+    return List.generate(
+      boardSize,
+      (i) => List.generate(boardSize, (j) => false),
+    );
+  }
+
   static bool isValidMove(
     BoardState boardState,
     int fromRow,
@@ -52,10 +60,7 @@ class MoveValidator {
 
   static List<List<bool>> getValidMoves(BoardState boardState) {
     final boardSize = boardState.board.length;
-    final validMoves = List.generate(
-      boardSize,
-      (i) => List.generate(boardSize, (j) => false),
-    );
+    final validMoves = _createEmptyMoves(boardState);
 
     for (int row = 0; row < boardSize; row++) {
       for (int col = 0; col < boardSize; col++) {
@@ -75,6 +80,38 @@ class MoveValidator {
             }
           }
         }
+      }
+    }
+
+    return validMoves;
+  }
+
+  static List<List<bool>> getValidMovesFromPiece(
+    BoardState boardState,
+    int fromRow,
+    int fromCol,
+  ) {
+    final validMoves = _createEmptyMoves(boardState);
+
+    if (!boardState.isValidPosition(fromRow, fromCol)) {
+      return validMoves;
+    }
+
+    final fromPiece = boardState.getPiece(fromRow, fromCol);
+    if (!fromPiece.isPeg) {
+      return validMoves;
+    }
+
+    final destinations = [
+      (fromRow - 2, fromCol),
+      (fromRow + 2, fromCol),
+      (fromRow, fromCol - 2),
+      (fromRow, fromCol + 2),
+    ];
+
+    for (final (toRow, toCol) in destinations) {
+      if (isValidMove(boardState, fromRow, fromCol, toRow, toCol)) {
+        validMoves[toRow][toCol] = true;
       }
     }
 

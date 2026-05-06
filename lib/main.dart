@@ -28,6 +28,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'Solo Test',
+        debugShowCheckedModeBanner: false,
         theme: AppTheme.darkTheme(),
         darkTheme: AppTheme.darkTheme(),
         themeMode: ThemeMode.dark,

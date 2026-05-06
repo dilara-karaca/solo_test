@@ -151,14 +151,18 @@ class GameEngine {
   }
 
   int _calculateScore(int remainingPieces) {
-    return AppConstants.SCORE_POINTS[remainingPieces] ?? 0;
+    return AppConstants.getScoreForRemainingPieces(remainingPieces);
   }
 
   String _getGrade(int remainingPieces) {
-    return AppConstants.SCORE_GRADES[remainingPieces] ?? 'UNKNOWN';
+    return AppConstants.getGradeForRemainingPieces(remainingPieces);
   }
 
   List<List<bool>> getValidMovesForBoard() {
     return MoveValidator.getValidMoves(boardState);
+  }
+
+  List<List<bool>> getValidMovesForPiece(int row, int col) {
+    return MoveValidator.getValidMovesFromPiece(boardState, row, col);
   }
 }

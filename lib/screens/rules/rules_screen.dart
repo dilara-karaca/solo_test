@@ -48,18 +48,17 @@ class RulesScreen extends StatelessWidget {
               const SizedBox(height: 8),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children:
-                    AppConstants.SCORE_GRADES.entries.map((entry) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Text(
-                          '${entry.key} → ${entry.value} (${AppConstants.SCORE_POINTS[entry.key] ?? 0} pts)',
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.textTertiary,
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                children: const [
+                  _RuleScoreLine(range: '1', grade: 'BILGIN', points: 200),
+                  _RuleScoreLine(range: '2', grade: 'ZEKI', points: 175),
+                  _RuleScoreLine(range: '3', grade: 'KURNAZ', points: 150),
+                  _RuleScoreLine(range: '4', grade: 'BASARILI', points: 125),
+                  _RuleScoreLine(range: '5', grade: 'NORMAL', points: 100),
+                  _RuleScoreLine(range: '6', grade: 'TECRUBESIZ', points: 75),
+                  _RuleScoreLine(range: '7', grade: 'APTAL', points: 50),
+                  _RuleScoreLine(range: '8', grade: 'GERIZEKALI', points: 25),
+                  _RuleScoreLine(range: '9+', grade: 'BEYINSIZ', points: 0),
+                ],
               ),
               const SizedBox(height: 20),
               Text('İpuçları', style: AppTextStyles.heading3),
@@ -75,6 +74,29 @@ class RulesScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _RuleScoreLine extends StatelessWidget {
+  final String range;
+  final String grade;
+  final int points;
+
+  const _RuleScoreLine({
+    required this.range,
+    required this.grade,
+    required this.points,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Text(
+        '$range kalan tas -> $grade ($points puan)',
+        style: AppTextStyles.bodySmall.copyWith(color: AppColors.textTertiary),
       ),
     );
   }

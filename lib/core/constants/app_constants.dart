@@ -4,26 +4,65 @@ class AppConstants {
   static const int INITIAL_PIECES = 32;
   static const int TARGET_PIECES = 1;
 
-  // Game Scoring
+  // Game Scoring (remaining pieces -> level)
   static const Map<int, String> SCORE_GRADES = {
-    1: 'SOLO TEST',
-    2: 'EXCELLENT',
-    3: 'GOOD',
-    4: 'AVERAGE',
-    5: 'POOR',
-    6: 'TERRIBLE',
-    32: 'FAILED',
+    1: 'BILGIN',
+    2: 'ZEKI',
+    3: 'KURNAZ',
+    4: 'BASARILI',
+    5: 'NORMAL',
+    6: 'TECRUBESIZ',
+    7: 'APTAL',
+    8: 'GERIZEKALI',
+    9: 'BEYINSIZ',
   };
 
   static const Map<int, int> SCORE_POINTS = {
-    1: 10000,
-    2: 8000,
-    3: 6000,
-    4: 4000,
-    5: 2000,
-    6: 1000,
-    32: 0,
+    1: 200,
+    2: 175,
+    3: 150,
+    4: 125,
+    5: 100,
+    6: 75,
+    7: 50,
+    8: 25,
+    9: 0,
   };
+
+  static String getGradeForRemainingPieces(int remainingPieces) {
+    if (remainingPieces <= 1) return 'BILGIN';
+    if (remainingPieces == 2) return 'ZEKI';
+    if (remainingPieces == 3) return 'KURNAZ';
+    if (remainingPieces == 4) return 'BASARILI';
+    if (remainingPieces == 5) return 'NORMAL';
+    if (remainingPieces == 6) return 'TECRUBESIZ';
+    if (remainingPieces == 7) return 'APTAL';
+    if (remainingPieces == 8) return 'GERIZEKALI';
+    return 'BEYINSIZ';
+  }
+
+  static int getScoreForRemainingPieces(int remainingPieces) {
+    if (remainingPieces <= 1) return 200;
+    if (remainingPieces == 2) return 175;
+    if (remainingPieces == 3) return 150;
+    if (remainingPieces == 4) return 125;
+    if (remainingPieces == 5) return 100;
+    if (remainingPieces == 6) return 75;
+    if (remainingPieces == 7) return 50;
+    if (remainingPieces == 8) return 25;
+    return 0;
+  }
+
+  static String getAvatarForRemainingPieces(int remainingPieces) {
+    if (remainingPieces <= 1) return '👑';
+    if (remainingPieces <= 3) return '😎';
+    if (remainingPieces <= 5) return '🙂';
+    if (remainingPieces == 6) return '😐';
+    if (remainingPieces == 7) return '🤪';
+    if (remainingPieces == 8) return '😵';
+    if (remainingPieces <= 10) return '🤯';
+    return '🥴';
+  }
 
   // Piece Types
   static const int EMPTY = 0;

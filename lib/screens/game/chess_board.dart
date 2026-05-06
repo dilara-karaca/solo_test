@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:solo_test/models/board_state.dart';
 import 'package:solo_test/core/constants/app_colors.dart';
+import 'package:solo_test/models/board_state.dart';
+import 'package:solo_test/models/piece.dart';
+
 import 'chess_piece.dart';
 
 class ChessBoard extends StatefulWidget {
@@ -9,7 +11,7 @@ class ChessBoard extends StatefulWidget {
   final int? selectedCol;
   final List<List<bool>> validMoves;
   final Function(int, int) onPieceSelected;
-  final Function(int, int) onMoveMade;
+  final Function(int, int, int, int) onMoveMade;
 
   const ChessBoard({
     super.key,
@@ -25,10 +27,19 @@ class ChessBoard extends StatefulWidget {
   State<ChessBoard> createState() => _ChessBoardState();
 }
 
+class _DragPieceData {
+  final int row;
+  final int col;
+
+  const _DragPieceData({required this.row, required this.col});
+}
+
 class _ChessBoardState extends State<ChessBoard>
     with SingleTickerProviderStateMixin {
-  late AnimationController _pulseCtrl;
-  late Animation<double> _pulseAnim;
+  late final AnimationController _pulseCtrl;
+  late final Animation<double> _pulseAnim;
+  int? _draggingRow;
+  int? _draggingCol;
 
   @override
   void initState() {
@@ -37,9 +48,10 @@ class _ChessBoardState extends State<ChessBoard>
       vsync: this,
       duration: const Duration(milliseconds: 750),
     )..repeat(reverse: true);
-    _pulseAnim = Tween<double>(begin: 0.3, end: 1.0).animate(
-      CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut),
-    );
+    _pulseAnim = Tween<double>(
+      begin: 0.3,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -48,12 +60,17 @@ class _ChessBoardState extends State<ChessBoard>
     super.dispose();
   }
 
+  bool _isDragTarget(int row, int col) {
+    return widget.selectedRow != null && widget.validMoves[row][col];
+  }
+
   @override
   Widget build(BuildContext context) {
     final boardSize = widget.boardState.board.length;
 
     return Center(
       child: Container(
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: AppColors.boardBackground,
           borderRadius: BorderRadius.circular(22),
@@ -71,7 +88,6 @@ class _ChessBoardState extends State<ChessBoard>
             ),
           ],
         ),
-        padding: const EdgeInsets.all(14),
         child: AnimatedBuilder(
           animation: _pulseAnim,
           builder: (context, _) {
@@ -92,26 +108,122 @@ class _ChessBoardState extends State<ChessBoard>
                 final isValid = widget.boardState.isValidPosition(row, col);
                 final isSelected =
                     widget.selectedRow == row && widget.selectedCol == col;
-                final isValidMove =
-                    widget.validMoves[row][col] && widget.selectedRow != null;
+                final isTarget = _isDragTarget(row, col);
+                final isDraggingSource =
+                    _draggingRow == row && _draggingCol == col;
 
-                return GestureDetector(
+                final pieceWidget =
+                    piece.isPeg && isValid
+                        ? LongPressDraggable<_DragPieceData>(
+                          data: _DragPieceData(row: row, col: col),
+                          dragAnchorStrategy: pointerDragAnchorStrategy,
+                          onDragStarted: () {
+                            setState(() {
+                              _draggingRow = row;
+                              _draggingCol = col;
+                            });
+                            widget.onPieceSelected(row, col);
+                          },
+                          onDraggableCanceled: (_, __) {
+                            if (mounted) {
+                              setState(() {
+                                _draggingRow = null;
+                                _draggingCol = null;
+                              });
+                            }
+                          },
+                          onDragEnd: (_) {
+                            if (mounted) {
+                              setState(() {
+                                _draggingRow = null;
+                                _draggingCol = null;
+                              });
+                            }
+                          },
+                          feedback: Material(
+                            color: Colors.transparent,
+                            child: SizedBox(
+                              width: 62,
+                              height: 62,
+                              child: ChessPiece(
+                                piece: piece,
+                                isSelected: true,
+                                isDragging: true,
+                              ),
+                            ),
+                          ),
+                          childWhenDragging: Opacity(
+                            opacity: 0.2,
+                            child: ChessPiece(
+                              piece: piece,
+                              isSelected: isSelected,
+                              isDragging: isDraggingSource,
+                            ),
+                          ),
+                          child: ChessPiece(
+                            piece: piece,
+                            isSelected: isSelected,
+                            isDragging: isDraggingSource,
+                          ),
+                        )
+                        : null;
+
+                final cell = GestureDetector(
                   onTap: () {
-                    if (isSelected || (piece.isPeg && isValid)) {
+                    if (piece.isPeg && isValid) {
                       widget.onPieceSelected(row, col);
-                    } else if (isValidMove) {
-                      widget.onMoveMade(row, col);
+                      return;
+                    }
+
+                    if (isTarget &&
+                        widget.selectedRow != null &&
+                        widget.selectedCol != null) {
+                      widget.onMoveMade(
+                        widget.selectedRow!,
+                        widget.selectedCol!,
+                        row,
+                        col,
+                      );
                     }
                   },
                   child: _BoardCell(
                     isValid: isValid,
                     isSelected: isSelected,
-                    isValidMove: isValidMove,
+                    isValidMove: isTarget,
                     pulseValue: _pulseAnim.value,
-                    child: piece.isPeg && isValid
-                        ? ChessPiece(piece: piece, isSelected: isSelected)
-                        : null,
+                    child: pieceWidget,
                   ),
+                );
+
+                if (!isTarget) {
+                  return cell;
+                }
+
+                return DragTarget<_DragPieceData>(
+                  onWillAcceptWithDetails: (details) {
+                    final data = details.data;
+                    return data.row == widget.selectedRow &&
+                        data.col == widget.selectedCol;
+                  },
+                  onAcceptWithDetails: (details) {
+                    widget.onMoveMade(
+                      details.data.row,
+                      details.data.col,
+                      row,
+                      col,
+                    );
+                  },
+                  builder: (context, candidateData, rejectedData) {
+                    return _BoardCell(
+                      isValid: isValid,
+                      isSelected: isSelected,
+                      isValidMove: true,
+                      pulseValue:
+                          candidateData.isNotEmpty ? 1.0 : _pulseAnim.value,
+                      isDragHover: candidateData.isNotEmpty,
+                      child: cell,
+                    );
+                  },
                 );
               },
             );
@@ -126,6 +238,7 @@ class _BoardCell extends StatelessWidget {
   final bool isValid;
   final bool isSelected;
   final bool isValidMove;
+  final bool isDragHover;
   final double pulseValue;
   final Widget? child;
 
@@ -134,6 +247,7 @@ class _BoardCell extends StatelessWidget {
     required this.isSelected,
     required this.isValidMove,
     required this.pulseValue,
+    this.isDragHover = false,
     this.child,
   });
 
@@ -151,28 +265,42 @@ class _BoardCell extends StatelessWidget {
     if (isValidMove) {
       return Container(
         decoration: BoxDecoration(
-          color: AppColors.validMoveColor.withOpacity(0.06 + pulseValue * 0.08),
+          color: AppColors.validMoveColor.withOpacity(
+            isDragHover ? 0.2 : 0.06 + pulseValue * 0.08,
+          ),
           borderRadius: BorderRadius.circular(9),
           border: Border.all(
-            color: AppColors.validMoveColor.withOpacity(pulseValue * 0.9),
-            width: 1.5,
+            color: AppColors.validMoveColor.withOpacity(
+              isDragHover ? 1.0 : pulseValue * 0.9,
+            ),
+            width: isDragHover ? 2.2 : 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.validMoveColor.withOpacity(pulseValue * 0.22),
-              blurRadius: 10,
+              color: AppColors.validMoveColor.withOpacity(
+                isDragHover ? 0.32 : pulseValue * 0.22,
+              ),
+              blurRadius: isDragHover ? 14 : 10,
             ),
           ],
         ),
-        child: Center(
-          child: Container(
-            width: 9,
-            height: 9,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.validMoveColor.withOpacity(pulseValue * 0.75),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (child != null) child!,
+            Center(
+              child: Container(
+                width: 9,
+                height: 9,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.validMoveColor.withOpacity(
+                    isDragHover ? 1.0 : pulseValue * 0.75,
+                  ),
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       );
     }
