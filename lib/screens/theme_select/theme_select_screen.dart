@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -16,8 +15,7 @@ class ThemeSelectScreen extends StatefulWidget {
 class _ThemeSelectScreenState extends State<ThemeSelectScreen>
     with TickerProviderStateMixin {
   late AnimationController _bgController;
-  late AnimationController _cardController;
-  late Animation<double> _cardAnim;
+  late ScrollController _scrollController;
   int _selectedIndex = 0;
 
   final List<GameTheme> _themes = GameTheme.values;
@@ -29,23 +27,24 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
       vsync: this,
       duration: const Duration(seconds: 6),
     )..repeat(reverse: true);
-    _cardController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
-    _cardAnim = CurvedAnimation(parent: _cardController, curve: Curves.easeOutBack);
-    _cardController.forward();
+    _scrollController = ScrollController();
   }
 
   @override
   void dispose() {
     _bgController.dispose();
-    _cardController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
   void _selectTheme(int index) {
     setState(() => _selectedIndex = index);
+    // Scroll to center the selected card
+    _scrollController.animateTo(
+      index * 280.0,
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOutCubic,
+    );
   }
 
   void _confirm() {
@@ -67,46 +66,51 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
             // Animated background glows
             AnimatedBuilder(
               animation: _bgController,
-              builder: (_, __) => Stack(
-                children: [
-                  Positioned(
-                    top: -100,
-                    right: -80,
-                    child: Opacity(
-                      opacity: 0.35 + _bgController.value * 0.25,
-                      child: Container(
-                        width: 340,
-                        height: 340,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(colors: [
-                            selectedTheme.backgroundGlow1,
-                            Colors.transparent,
-                          ]),
+              builder:
+                  (_, __) => Stack(
+                    children: [
+                      Positioned(
+                        top: -100,
+                        right: -80,
+                        child: Opacity(
+                          opacity: 0.35 + _bgController.value * 0.25,
+                          child: Container(
+                            width: 340,
+                            height: 340,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: RadialGradient(
+                                colors: [
+                                  selectedTheme.backgroundGlow1,
+                                  Colors.transparent,
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 60,
-                    left: -100,
-                    child: Opacity(
-                      opacity: 0.25 + (1 - _bgController.value) * 0.2,
-                      child: Container(
-                        width: 260,
-                        height: 260,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(colors: [
-                            selectedTheme.backgroundGlow2,
-                            Colors.transparent,
-                          ]),
+                      Positioned(
+                        bottom: 60,
+                        left: -100,
+                        child: Opacity(
+                          opacity: 0.25 + (1 - _bgController.value) * 0.2,
+                          child: Container(
+                            width: 260,
+                            height: 260,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: RadialGradient(
+                                colors: [
+                                  selectedTheme.backgroundGlow2,
+                                  Colors.transparent,
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
             ),
 
             // Particles
@@ -122,12 +126,13 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                   const SizedBox(height: 48),
                   // Title
                   ShaderMask(
-                    shaderCallback: (bounds) => LinearGradient(
-                      colors: [
-                        selectedTheme.primaryLight,
-                        selectedTheme.accentColor,
-                      ],
-                    ).createShader(bounds),
+                    shaderCallback:
+                        (bounds) => LinearGradient(
+                          colors: [
+                            selectedTheme.primaryLight,
+                            selectedTheme.accentColor,
+                          ],
+                        ).createShader(bounds),
                     child: const Text(
                       'SOLO TEST',
                       style: TextStyle(
@@ -147,29 +152,37 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                       letterSpacing: 4,
                     ),
                   ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 40),
 
-                  // Theme cards
+                  // Horizontal scrollable theme cards
                   Expanded(
-                    child: ScaleTransition(
-                      scale: _cardAnim,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          children: List.generate(_themes.length, (i) {
-                            final t = allThemes[_themes[i]]!;
-                            final isSelected = i == _selectedIndex;
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 14),
-                              child: _ThemeCard(
-                                themeData: t,
-                                isSelected: isSelected,
-                                onTap: () => _selectTheme(i),
-                              ),
-                            );
-                          }),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: ListView.builder(
+                            controller: _scrollController,
+                            scrollDirection: Axis.horizontal,
+                            itemCount: _themes.length,
+                            itemBuilder: (context, i) {
+                              final t = allThemes[_themes[i]]!;
+                              final isSelected = i == _selectedIndex;
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  left: i == 0 ? 24 : 12,
+                                  right: i == _themes.length - 1 ? 24 : 0,
+                                  top: 12,
+                                  bottom: 12,
+                                ),
+                                child: _ThemeHorizontalCard(
+                                  themeData: t,
+                                  isSelected: isSelected,
+                                  onTap: () => _selectTheme(i),
+                                ),
+                              );
+                            },
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
 
@@ -191,12 +204,12 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
   }
 }
 
-class _ThemeCard extends StatelessWidget {
+class _ThemeHorizontalCard extends StatelessWidget {
   final GameThemeData themeData;
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _ThemeCard({
+  const _ThemeHorizontalCard({
     required this.themeData,
     required this.isSelected,
     required this.onTap,
@@ -207,90 +220,103 @@ class _ThemeCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 400),
         curve: Curves.easeOutCubic,
-        height: 90,
+        width: 240,
         decoration: BoxDecoration(
-          color: isSelected
-              ? themeData.primaryColor.withOpacity(0.18)
-              : themeData.glassColor,
-          borderRadius: BorderRadius.circular(22),
+          color:
+              isSelected
+                  ? themeData.primaryColor.withOpacity(0.18)
+                  : themeData.glassColor,
+          borderRadius: BorderRadius.circular(28),
           border: Border.all(
-            color: isSelected
-                ? themeData.primaryColor
-                : themeData.glassBorder,
-            width: isSelected ? 2 : 1,
+            color: isSelected ? themeData.primaryColor : themeData.glassBorder,
+            width: isSelected ? 2.5 : 1.5,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: themeData.primaryColor.withOpacity(0.35),
-                    blurRadius: 24,
-                    spreadRadius: 2,
-                  ),
-                ]
-              : [],
+          boxShadow:
+              isSelected
+                  ? [
+                    BoxShadow(
+                      color: themeData.primaryColor.withOpacity(0.4),
+                      blurRadius: 32,
+                      spreadRadius: 4,
+                    ),
+                  ]
+                  : [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 12,
+                    ),
+                  ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(28),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Mini board preview
-                  _MiniPreview(themeData: themeData),
-                  const SizedBox(width: 18),
-                  // Text
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          themeData.name,
-                          style: TextStyle(
-                            color: isSelected
-                                ? themeData.primaryLight
-                                : themeData.textPrimary,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          themeData.description,
-                          style: TextStyle(
-                            color: themeData.textSecondary,
-                            fontSize: 12,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ],
+                  // Large board preview
+                  _LargeBoardPreview(themeData: themeData),
+                  const SizedBox(height: 14),
+                  // Theme name
+                  Text(
+                    themeData.name,
+                    style: TextStyle(
+                      color:
+                          isSelected
+                              ? themeData.primaryLight
+                              : themeData.textPrimary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.5,
                     ),
+                    textAlign: TextAlign.center,
                   ),
+                  const SizedBox(height: 6),
+                  // Theme description
+                  Text(
+                    themeData.description,
+                    style: TextStyle(
+                      color: themeData.textSecondary,
+                      fontSize: 11,
+                      letterSpacing: 0.3,
+                      height: 1.4,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 10),
                   // Selection indicator
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 250),
-                    width: 22,
-                    height: 22,
+                    width: 28,
+                    height: 28,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: isSelected
-                          ? themeData.primaryColor
-                          : Colors.transparent,
+                      color:
+                          isSelected
+                              ? themeData.primaryColor
+                              : Colors.transparent,
                       border: Border.all(
-                        color: isSelected
-                            ? themeData.primaryColor
-                            : themeData.glassBorder,
+                        color:
+                            isSelected
+                                ? themeData.primaryColor
+                                : themeData.glassBorder,
                         width: 2,
                       ),
                     ),
-                    child: isSelected
-                        ? const Icon(Icons.check, color: Colors.white, size: 13)
-                        : null,
+                    child:
+                        isSelected
+                            ? const Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              size: 16,
+                            )
+                            : null,
                   ),
                 ],
               ),
@@ -302,51 +328,95 @@ class _ThemeCard extends StatelessWidget {
   }
 }
 
-class _MiniPreview extends StatelessWidget {
+class _LargeBoardPreview extends StatelessWidget {
   final GameThemeData themeData;
 
-  const _MiniPreview({required this.themeData});
+  const _LargeBoardPreview({required this.themeData});
 
   @override
   Widget build(BuildContext context) {
-    // Simplified cross-shape of the solitaire board (5x5 version)
+    // Simplified cross-shape of the solitaire board (7x7 version for better preview)
     const valid = [
-      false, false, true, false, false,
-      false, false, true, false, false,
-      true,  true,  true, true,  true,
-      false, false, true, false, false,
-      false, false, true, false, false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false,
     ];
 
     return Container(
-      width: 56,
-      height: 56,
+      width: 140,
+      height: 140,
       decoration: BoxDecoration(
         color: themeData.boardBackground,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: themeData.boardBorder, width: 1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: themeData.boardBorder, width: 1.5),
       ),
-      padding: const EdgeInsets.all(5),
+      padding: const EdgeInsets.all(8),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 5,
-          mainAxisSpacing: 2,
-          crossAxisSpacing: 2,
+          crossAxisCount: 7,
+          mainAxisSpacing: 2.5,
+          crossAxisSpacing: 2.5,
         ),
-        itemCount: 25,
+        itemCount: 49,
         itemBuilder: (_, i) {
           if (!valid[i]) {
             return Container(
               decoration: BoxDecoration(
                 color: themeData.boardEmpty,
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(3),
               ),
             );
           }
           // Center is empty hole
-          if (i == 12) {
+          if (i == 24) {
             return Container(
               decoration: BoxDecoration(
                 color: themeData.boardHole,
@@ -365,6 +435,12 @@ class _MiniPreview extends StatelessWidget {
                   themeData.piecePrimary,
                 ],
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: themeData.piecePrimary.withOpacity(0.4),
+                  blurRadius: 4,
+                ),
+              ],
             ),
           );
         },
@@ -438,7 +514,11 @@ class _StartButtonState extends State<_StartButton>
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 28),
+              const Icon(
+                Icons.play_arrow_rounded,
+                color: Colors.white,
+                size: 28,
+              ),
               const SizedBox(width: 10),
               const Text(
                 'BAŞLA',
