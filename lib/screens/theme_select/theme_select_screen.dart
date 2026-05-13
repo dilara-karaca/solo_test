@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,8 +16,8 @@ class ThemeSelectScreen extends StatefulWidget {
 class _ThemeSelectScreenState extends State<ThemeSelectScreen>
     with TickerProviderStateMixin {
   late AnimationController _bgController;
-  late ScrollController _scrollController;
-  int _selectedIndex = 0;
+  late PageController _pageController;
+  double _pageOffset = 0;
 
   final List<GameTheme> _themes = GameTheme.values;
 
@@ -27,34 +28,69 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
       vsync: this,
       duration: const Duration(seconds: 6),
     )..repeat(reverse: true);
-    _scrollController = ScrollController();
+    _pageController = PageController(viewportFraction: 0.4, initialPage: 0);
+    _pageController.addListener(() {
+      setState(() => _pageOffset = _pageController.page ?? 0);
+    });
   }
 
   @override
   void dispose() {
     _bgController.dispose();
-    _scrollController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
-  void _selectTheme(int index) {
-    setState(() => _selectedIndex = index);
-    // Scroll to center the selected card
-    _scrollController.animateTo(
-      index * 280.0,
-      duration: const Duration(milliseconds: 600),
-      curve: Curves.easeOutCubic,
-    );
+  void _confirm() {
+    final selectedIndex = _pageOffset.round();
+    context.read<ThemeProvider>().setTheme(_themes[selectedIndex]);
+    Navigator.of(context).pushReplacementNamed('/home');
   }
 
-  void _confirm() {
-    context.read<ThemeProvider>().setTheme(_themes[_selectedIndex]);
-    Navigator.of(context).pushReplacementNamed('/home');
+  List<Widget> _buildCircularCards() {
+    const double radius = 120;
+    const double angleStep = 2 * math.pi / 3; // 3 kartı eşit şekilde dağıt
+
+    return List.generate(_themes.length, (index) {
+      final angle = angleStep * (index - _pageOffset);
+      final offsetX = radius * math.sin(angle);
+      final offsetY = radius * math.cos(angle) - radius + 40;
+
+      // Derinlik hesapla - açıya göre ölçek ve opacity
+      final depthFactor = (math.cos(angle) + 1) / 2; // 0 ile 1 arasında
+      final scale = 0.6 + (depthFactor * 0.4);
+      final opacity = 0.5 + (depthFactor * 0.5);
+
+      final t = allThemes[_themes[index]]!;
+      final isSelected = (index - _pageOffset).abs() < 0.5;
+
+      return Transform.translate(
+        offset: Offset(offsetX, offsetY),
+        child: Transform.scale(
+          scale: scale,
+          child: Opacity(
+            opacity: opacity,
+            child: _ThemeCircularCard(
+              themeData: t,
+              isSelected: isSelected,
+              onTap: () {
+                _pageController.animateToPage(
+                  index,
+                  duration: const Duration(milliseconds: 600),
+                  curve: Curves.easeOutCubic,
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final selectedTheme = allThemes[_themes[_selectedIndex]]!;
+    final selectedIndex = _pageOffset.round();
+    final selectedTheme = allThemes[_themes[selectedIndex]]!;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 500),
@@ -154,35 +190,27 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                   ),
                   const SizedBox(height: 40),
 
-                  // Horizontal scrollable theme cards
+                  // Circular carousel theme cards
                   Expanded(
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: ListView.builder(
-                            controller: _scrollController,
-                            scrollDirection: Axis.horizontal,
-                            itemCount: _themes.length,
-                            itemBuilder: (context, i) {
-                              final t = allThemes[_themes[i]]!;
-                              final isSelected = i == _selectedIndex;
-                              return Padding(
-                                padding: EdgeInsets.only(
-                                  left: i == 0 ? 24 : 12,
-                                  right: i == _themes.length - 1 ? 24 : 0,
-                                  top: 12,
-                                  bottom: 12,
-                                ),
-                                child: _ThemeHorizontalCard(
-                                  themeData: t,
-                                  isSelected: isSelected,
-                                  onTap: () => _selectTheme(i),
-                                ),
-                              );
-                            },
-                          ),
+                    child: Center(
+                      child: SizedBox(
+                        height: 400,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            // PageView for smooth scrolling
+                            PageView.builder(
+                              controller: _pageController,
+                              itemCount: _themes.length,
+                              itemBuilder: (context, index) {
+                                return const SizedBox.expand();
+                              },
+                            ),
+                            // Circular positioned cards
+                            ..._buildCircularCards(),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
 
@@ -204,12 +232,12 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
   }
 }
 
-class _ThemeHorizontalCard extends StatelessWidget {
+class _ThemeCircularCard extends StatelessWidget {
   final GameThemeData themeData;
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _ThemeHorizontalCard({
+  const _ThemeCircularCard({
     required this.themeData,
     required this.isSelected,
     required this.onTap,
@@ -222,7 +250,8 @@ class _ThemeHorizontalCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 400),
         curve: Curves.easeOutCubic,
-        width: 240,
+        width: 200,
+        height: 280,
         decoration: BoxDecoration(
           color:
               isSelected
