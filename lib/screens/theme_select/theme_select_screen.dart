@@ -28,7 +28,7 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
       vsync: this,
       duration: const Duration(seconds: 6),
     )..repeat(reverse: true);
-    _pageController = PageController(viewportFraction: 0.4, initialPage: 0);
+    _pageController = PageController(viewportFraction: 0.65, initialPage: 0);
     _pageController.addListener(() {
       setState(() => _pageOffset = _pageController.page ?? 0);
     });
@@ -48,17 +48,17 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
   }
 
   List<Widget> _buildCircularCards() {
-    const double radius = 120;
+    const double radius = 160;
     const double angleStep = 2 * math.pi / 3; // 3 kartı eşit şekilde dağıt
 
     return List.generate(_themes.length, (index) {
       final angle = angleStep * (index - _pageOffset);
       final offsetX = radius * math.sin(angle);
-      final offsetY = radius * math.cos(angle) - radius + 40;
+      final offsetY = radius * math.cos(angle) - radius + 60;
 
       // Derinlik hesapla - açıya göre ölçek ve opacity
       final depthFactor = (math.cos(angle) + 1) / 2; // 0 ile 1 arasında
-      final scale = 0.6 + (depthFactor * 0.4);
+      final scale = 0.75 + (depthFactor * 0.25);
       final opacity = 0.5 + (depthFactor * 0.5);
 
       final t = allThemes[_themes[index]]!;
@@ -250,8 +250,8 @@ class _ThemeCircularCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 400),
         curve: Curves.easeOutCubic,
-        width: 200,
-        height: 280,
+        width: 240,
+        height: 320,
         decoration: BoxDecoration(
           color:
               isSelected
