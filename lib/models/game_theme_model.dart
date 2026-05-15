@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum GameTheme { classic, hellokitty, cars }
+enum GameTheme { classic, cat, hellokitty, cars }
 
 class GameThemeData {
   final String id;
@@ -26,9 +26,9 @@ class GameThemeData {
   final Color pieceSelected;
 
   // Asset-based piece
-  final String? pieceAsset;       // path to image asset, null = use gradient ball
-  final String pieceEmoji;        // fallback emoji
-  final List<String> particles;   // floating particles
+  final String? pieceAsset; // path to image asset, null = use gradient ball
+  final String pieceEmoji; // fallback emoji
+  final List<String> particles; // floating particles
   final bool useAssetPiece;
 
   // UI
@@ -187,8 +187,47 @@ const carsTheme = GameThemeData(
   glassBorder: Color(0x25FF5252),
 );
 
+// existing themes map is defined below with the added `cat` theme
+
+const catTheme = GameThemeData(
+  id: 'cat',
+  name: 'KEDİ',
+  emoji: '🐈',
+  description: 'Sevimli kedi taşları',
+  pieceAsset: 'assets/images/cat/cat.png',
+  pieceEmoji: '🐾',
+  particles: ['🐾', '✨', '😺'],
+  useAssetPiece: true,
+  backgroundColor: Color(0xFFFFF8E1),
+  backgroundGlow1: Color(0xFFFFE082),
+  backgroundGlow2: Color(0xFFFFCC80),
+  boardBackground: Color(0xFFFFF3DE),
+  boardBorder: Color(0xFFFFE0B2),
+  boardHole: Color(0xFFFFF7E6),
+  boardEmpty: Color(0x00000000),
+  piecePrimary: Color(0xFFFF8A65),
+  pieceDark: Color(0xFFD9644A),
+  pieceHighlight: Color(0xFFFFAB91),
+  pieceSelected: Color(0xFFFF7043),
+  primaryColor: Color(0xFFFF8A65),
+  primaryDark: Color(0xFFD9644A),
+  primaryLight: Color(0xFFFFCCBC),
+  accentColor: Color(0xFFFFAB91),
+  surfaceColor: Color(0xFFFFF3DE),
+  surfaceLight: Color(0xFFFFF7EE),
+  borderLight: Color(0xFFFFE0B2),
+  borderGlow: Color(0x55FF8A65),
+  validMoveColor: Color(0xFF81C784),
+  textPrimary: Color(0xFF4E342E),
+  textSecondary: Color(0xFF6D4C41),
+  glassColor: Color(0x12FF8A65),
+  glassBorder: Color(0x20FF8A65),
+);
+
+// All themes map in the desired display order
 const Map<GameTheme, GameThemeData> allThemes = {
   GameTheme.classic: classicTheme,
+  GameTheme.cat: catTheme,
   GameTheme.hellokitty: hellokittyTheme,
   GameTheme.cars: carsTheme,
 };

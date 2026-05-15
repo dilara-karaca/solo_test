@@ -49,7 +49,8 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
 
   List<Widget> _buildCircularCards() {
     const double radius = 160;
-    const double angleStep = 2 * math.pi / 3; // 3 kartı eşit şekilde dağıt
+    final double angleStep =
+        2 * math.pi / _themes.length; // kartları eşit şekilde dağıt
 
     return List.generate(_themes.length, (index) {
       final angle = angleStep * (index - _pageOffset);
