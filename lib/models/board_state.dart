@@ -56,10 +56,10 @@ class BoardState {
       }
     }
 
-    void assignAlternatingVariants() {
+    void assignAlternatingVariants({int startOffset = 0}) {
       for (final (row, col) in pegPositions) {
         board[row][col] = board[row][col].copyWith(
-          pieceVariant: (row + col) % 2,
+          pieceVariant: (row + col + startOffset) % 2,
         );
       }
     }
@@ -72,7 +72,7 @@ class BoardState {
         assignRandomVariants(3);
         break;
       case GameTheme.stitch:
-        assignRandomVariants(2);
+        assignAlternatingVariants(startOffset: random.nextInt(2));
         break;
       case GameTheme.sungerbob:
         assignAlternatingVariants();
