@@ -80,7 +80,7 @@ class _ChessPieceState extends State<ChessPiece>
         );
       },
       child: Padding(
-        padding: const EdgeInsets.all(3),
+        padding: const EdgeInsets.all(1),
         child:
             t.useAssetPiece && t.pieceAsset != null
                 ? _AssetPiece(themeData: t, isActive: isActive)
