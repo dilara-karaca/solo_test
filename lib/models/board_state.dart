@@ -29,17 +29,36 @@ class BoardState {
           return Piece(row: row, column: col, isPeg: false);
         }
         // All other positions have pegs
-        // For fruits theme, assign random fruit variants (0-4)
-        final fruitVariant =
-            theme == GameTheme.fruits ? random.nextInt(5) : null;
-        return Piece(
-          row: row,
-          column: col,
-          isPeg: true,
-          fruitVariant: fruitVariant,
-        );
+        return Piece(row: row, column: col, isPeg: true);
       }),
     );
+
+    // For fruits theme, shuffle fruit variants across all pegs
+    if (theme == GameTheme.fruits) {
+      // Collect all peg positions
+      final pegPositions = <(int, int)>[];
+      for (int row = 0; row < board.length; row++) {
+        for (int col = 0; col < board[row].length; col++) {
+          if (board[row][col].isPeg) {
+            pegPositions.add((row, col));
+          }
+        }
+      }
+
+      // Create and shuffle fruit variants (0-4)
+      final variants = <int>[];
+      final fruitsPerType = (pegPositions.length / 5).ceil();
+      for (int i = 0; i < 5; i++) {
+        variants.addAll(List.filled(fruitsPerType, i));
+      }
+      variants.shuffle(random);
+
+      // Assign shuffled variants to pegs
+      for (int i = 0; i < pegPositions.length; i++) {
+        final (row, col) = pegPositions[i];
+        board[row][col] = board[row][col].copyWith(fruitVariant: variants[i]);
+      }
+    }
 
     return BoardState(
       board: board,
