@@ -3,15 +3,14 @@ class Piece {
   final int column;
   bool isPeg;
   bool isSelected;
-  final int?
-  fruitVariant; // 0-4 for fruits theme (apple, banana, blueberry, kiwi, strawberry)
+  final int? pieceVariant; // theme-specific image variant index
 
   Piece({
     required this.row,
     required this.column,
     this.isPeg = true,
     this.isSelected = false,
-    this.fruitVariant,
+    this.pieceVariant,
   });
 
   Piece copyWith({
@@ -19,14 +18,14 @@ class Piece {
     int? column,
     bool? isPeg,
     bool? isSelected,
-    int? fruitVariant,
+    int? pieceVariant,
   }) {
     return Piece(
       row: row ?? this.row,
       column: column ?? this.column,
       isPeg: isPeg ?? this.isPeg,
       isSelected: isSelected ?? this.isSelected,
-      fruitVariant: fruitVariant ?? this.fruitVariant,
+      pieceVariant: pieceVariant ?? this.pieceVariant,
     );
   }
 

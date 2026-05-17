@@ -68,6 +68,9 @@ flutter:
     - assets/images/hellokitty/
     - assets/images/cat/
     - assets/images/fruits/
+    - assets/images/powerpuff_girls/
+    - assets/images/spiderman/
+    - assets/images/sungerbob/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

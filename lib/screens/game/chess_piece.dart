@@ -82,13 +82,12 @@ class _ChessPieceState extends State<ChessPiece>
       child: Padding(
         padding: const EdgeInsets.all(1),
         child:
-            t.useAssetPiece && t.pieceAsset != null
-                ? _AssetPiece(themeData: t, isActive: isActive)
-                : widget.piece.fruitVariant != null
-                ? _FruitPiece(
+            t.useAssetPiece &&
+                    (t.pieceAssets?.isNotEmpty == true || t.pieceAsset != null)
+                ? _AssetPiece(
                   themeData: t,
                   isActive: isActive,
-                  fruitVariant: widget.piece.fruitVariant!,
+                  pieceVariant: widget.piece.pieceVariant,
                 )
                 : _GradientPiece(themeData: t, isActive: isActive),
       ),
@@ -100,11 +99,50 @@ class _ChessPieceState extends State<ChessPiece>
 class _AssetPiece extends StatelessWidget {
   final GameThemeData themeData;
   final bool isActive;
+  final int? pieceVariant;
 
-  const _AssetPiece({required this.themeData, required this.isActive});
+  const _AssetPiece({
+    required this.themeData,
+    required this.isActive,
+    required this.pieceVariant,
+  });
+
+  List<String> get _assets {
+    if (themeData.pieceAssets != null && themeData.pieceAssets!.isNotEmpty) {
+      return themeData.pieceAssets!;
+    }
+    if (themeData.pieceAsset != null) {
+      return [themeData.pieceAsset!];
+    }
+    return const [];
+  }
+
+  String get _assetPath {
+    final assets = _assets;
+    if (assets.isEmpty) {
+      return '';
+    }
+    if (assets.length == 1 || pieceVariant == null) {
+      return assets.first;
+    }
+    return assets[pieceVariant!.clamp(0, assets.length - 1)];
+  }
 
   @override
   Widget build(BuildContext context) {
+    final assetPath = _assetPath;
+    final isPowerpuffGirls = themeData.id == 'powerpuffgirls';
+    final isSungerbob = themeData.id == 'sungerbob';
+    final isPatrick = isSungerbob && assetPath.contains('patrick.png');
+    final assetPadding =
+        isPowerpuffGirls
+            ? 4.0
+            : isSungerbob
+            ? (isPatrick ? 3.0 : 0.0)
+            : 0.0;
+    final assetFit =
+        isPowerpuffGirls || isSungerbob ? BoxFit.contain : BoxFit.cover;
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
@@ -128,12 +166,15 @@ class _AssetPiece extends StatelessWidget {
       ),
       child: ClipOval(
         child: Padding(
-          padding: const EdgeInsets.all(4),
-          child: Image.asset(
-            themeData.pieceAsset!,
-            fit: BoxFit.contain,
-            filterQuality: FilterQuality.high,
-          ),
+          padding: EdgeInsets.all(assetPadding),
+          child:
+              assetPath.isEmpty
+                  ? const SizedBox.shrink()
+                  : Image.asset(
+                    assetPath,
+                    fit: assetFit,
+                    filterQuality: FilterQuality.high,
+                  ),
         ),
       ),
     );
@@ -182,66 +223,6 @@ class _GradientPiece extends StatelessWidget {
             offset: Offset(0, 3),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Fruit image piece (for Fruits theme)
-class _FruitPiece extends StatelessWidget {
-  final GameThemeData themeData;
-  final bool isActive;
-  final int fruitVariant; // 0-4: apple, banana, blueberry, kiwi, strawberry
-
-  const _FruitPiece({
-    required this.themeData,
-    required this.isActive,
-    required this.fruitVariant,
-  });
-
-  String get _fruitAsset {
-    const fruits = [
-      'assets/images/fruits/apple.png',
-      'assets/images/fruits/banana.png',
-      'assets/images/fruits/blueberry.png',
-      'assets/images/fruits/kiwi.png',
-      'assets/images/fruits/strawberry.png',
-    ];
-    return fruits[fruitVariant.clamp(0, 4)];
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color:
-            isActive
-                ? themeData.pieceSelected.withOpacity(0.22)
-                : themeData.piecePrimary.withOpacity(0.10),
-        boxShadow: [
-          BoxShadow(
-            color: (isActive ? themeData.pieceSelected : themeData.piecePrimary)
-                .withOpacity(isActive ? 0.75 : 0.35),
-            blurRadius: isActive ? 18 : 7,
-            spreadRadius: isActive ? 3 : 0,
-          ),
-        ],
-        border:
-            isActive
-                ? Border.all(color: themeData.pieceSelected, width: 2.5)
-                : null,
-      ),
-      child: ClipOval(
-        child: Padding(
-          padding: const EdgeInsets.all(0),
-          child: Image.asset(
-            _fruitAsset,
-            fit: BoxFit.cover,
-            filterQuality: FilterQuality.high,
-          ),
-        ),
       ),
     );
   }

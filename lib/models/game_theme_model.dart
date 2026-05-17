@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
 
-enum GameTheme { classic, cat, hellokitty, cars, fruits }
+enum GameTheme {
+  classic,
+  cat,
+  hellokitty,
+  cars,
+  fruits,
+  powerpuffGirls,
+  spiderman,
+  sungerbob,
+}
 
 class GameThemeData {
   final String id;
@@ -26,6 +35,7 @@ class GameThemeData {
   final Color pieceSelected;
 
   // Asset-based piece
+  final List<String>? pieceAssets; // multiple image variants, if any
   final String? pieceAsset; // path to image asset, null = use gradient ball
   final String pieceEmoji; // fallback emoji
   final List<String> particles; // floating particles
@@ -62,6 +72,7 @@ class GameThemeData {
     required this.pieceDark,
     required this.pieceHighlight,
     required this.pieceSelected,
+    this.pieceAssets,
     this.pieceAsset,
     required this.pieceEmoji,
     required this.particles,
@@ -192,10 +203,17 @@ const fruitsTheme = GameThemeData(
   name: 'MEYVELER',
   emoji: '🍎',
   description: 'Renkli meyve sepeti — taze ve canlı',
+  pieceAssets: [
+    'assets/images/fruits/apple.png',
+    'assets/images/fruits/banana.png',
+    'assets/images/fruits/blueberry.png',
+    'assets/images/fruits/kiwi.png',
+    'assets/images/fruits/strawberry.png',
+  ],
   pieceAsset: null,
   pieceEmoji: '🍎',
   particles: ['🍎', '🍌', '🫐', '🥝', '🍓', '🌱', '✨'],
-  useAssetPiece: false,
+  useAssetPiece: true,
   backgroundColor: Color(0xFFF8F8F0),
   backgroundGlow1: Color(0xFFFF6B6B),
   backgroundGlow2: Color(0xFFFFD93D),
@@ -259,6 +277,121 @@ const catTheme = GameThemeData(
   glassBorder: Color(0x20FF8A65),
 );
 
+const powerpuffGirlsTheme = GameThemeData(
+  id: 'powerpuffgirls',
+  name: 'POWERPUFF GIRLS',
+  emoji: '🌈',
+  description: 'Üç kahraman, renkli ve enerjik taşlar',
+  pieceAssets: [
+    'assets/images/powerpuff_girls/powerpuffgirls1.png',
+    'assets/images/powerpuff_girls/powerpuffgirls2.png',
+    'assets/images/powerpuff_girls/powerpuffgirls3.png',
+  ],
+  pieceAsset: null,
+  pieceEmoji: '💖',
+  particles: ['💖', '💙', '💛', '✨', '🌸'],
+  useAssetPiece: true,
+  backgroundColor: Color(0xFFFFF7FB),
+  backgroundGlow1: Color(0xFFFFB3D9),
+  backgroundGlow2: Color(0xFF89CFF0),
+  boardBackground: Color(0xFFFFFAFC),
+  boardBorder: Color(0xFFF5C7E0),
+  boardHole: Color(0xFFFFF1F8),
+  boardEmpty: Color(0x00000000),
+  piecePrimary: Color(0xFFFF7EB6),
+  pieceDark: Color(0xFFE64A8A),
+  pieceHighlight: Color(0xFFFFB4D8),
+  pieceSelected: Color(0xFF7C4DFF),
+  primaryColor: Color(0xFFFF7EB6),
+  primaryDark: Color(0xFFE64A8A),
+  primaryLight: Color(0xFFFFB4D8),
+  accentColor: Color(0xFF7C4DFF),
+  surfaceColor: Color(0xFFFFFAFC),
+  surfaceLight: Color(0xFFFFF0F7),
+  borderLight: Color(0xFFF5C7E0),
+  borderGlow: Color(0x55FF7EB6),
+  validMoveColor: Color(0xFF6BCB77),
+  textPrimary: Color(0xFF4A2C5A),
+  textSecondary: Color(0xFF735A7F),
+  glassColor: Color(0x16FF7EB6),
+  glassBorder: Color(0x28FF7EB6),
+);
+
+const spidermanTheme = GameThemeData(
+  id: 'spiderman',
+  name: 'SPIDER-MAN',
+  emoji: '🕷️',
+  description: 'Örümcek adamın kırmızı-mavi enerjisi',
+  pieceAssets: ['assets/images/spiderman/spiderman.png'],
+  pieceAsset: null,
+  pieceEmoji: '🕸️',
+  particles: ['🕷️', '🕸️', '⚡', '🔥'],
+  useAssetPiece: true,
+  backgroundColor: Color(0xFF08111F),
+  backgroundGlow1: Color(0xFFE53935),
+  backgroundGlow2: Color(0xFF1E88E5),
+  boardBackground: Color(0xFF0D1728),
+  boardBorder: Color(0xFF223B5C),
+  boardHole: Color(0xFF06101F),
+  boardEmpty: Color(0x00000000),
+  piecePrimary: Color(0xFFE53935),
+  pieceDark: Color(0xFFB71C1C),
+  pieceHighlight: Color(0xFFFF6F61),
+  pieceSelected: Color(0xFF1E88E5),
+  primaryColor: Color(0xFFE53935),
+  primaryDark: Color(0xFFB71C1C),
+  primaryLight: Color(0xFFFF6F61),
+  accentColor: Color(0xFF1E88E5),
+  surfaceColor: Color(0xFF101C31),
+  surfaceLight: Color(0xFF17253D),
+  borderLight: Color(0xFF223B5C),
+  borderGlow: Color(0x55E53935),
+  validMoveColor: Color(0xFF43A047),
+  textPrimary: Color(0xFFF3F7FF),
+  textSecondary: Color(0xFFB3C3DA),
+  glassColor: Color(0x161E88E5),
+  glassBorder: Color(0x241E88E5),
+);
+
+const sungerbobTheme = GameThemeData(
+  id: 'sungerbob',
+  name: 'SÜNGERBOB',
+  emoji: '🧽',
+  description: 'SüngerBob ve Patrick sırayla dizilir',
+  pieceAssets: [
+    'assets/images/sungerbob/sungerbob.png',
+    'assets/images/sungerbob/patrick.png',
+  ],
+  pieceAsset: null,
+  pieceEmoji: '🧽',
+  particles: ['🧽', '⭐', '🌊', '🫧'],
+  useAssetPiece: true,
+  backgroundColor: Color(0xFFF4FAFF),
+  backgroundGlow1: Color(0xFF8DD8FF),
+  backgroundGlow2: Color(0xFFB39DDB),
+  boardBackground: Color(0xFFF9FDFF),
+  boardBorder: Color(0xFFB9D9EE),
+  boardHole: Color(0xFFF1F8FF),
+  boardEmpty: Color(0x00000000),
+  piecePrimary: Color(0xFF8FD3FF),
+  pieceDark: Color(0xFF1B88D3),
+  pieceHighlight: Color(0xFFCFEFFF),
+  pieceSelected: Color(0xFFFFA7C4),
+  primaryColor: Color(0xFF8FD3FF),
+  primaryDark: Color(0xFF1B88D3),
+  primaryLight: Color(0xFFCFEFFF),
+  accentColor: Color(0xFFFFA7C4),
+  surfaceColor: Color(0xFFF9FDFF),
+  surfaceLight: Color(0xFFF1F8FF),
+  borderLight: Color(0xFFB9D9EE),
+  borderGlow: Color(0x558FD3FF),
+  validMoveColor: Color(0xFF26A69A),
+  textPrimary: Color(0xFF5D4037),
+  textSecondary: Color(0xFF8D6E63),
+  glassColor: Color(0x168FD3FF),
+  glassBorder: Color(0x248FD3FF),
+);
+
 // All themes map in the desired display order
 const Map<GameTheme, GameThemeData> allThemes = {
   GameTheme.classic: classicTheme,
@@ -266,4 +399,7 @@ const Map<GameTheme, GameThemeData> allThemes = {
   GameTheme.hellokitty: hellokittyTheme,
   GameTheme.cars: carsTheme,
   GameTheme.fruits: fruitsTheme,
+  GameTheme.powerpuffGirls: powerpuffGirlsTheme,
+  GameTheme.spiderman: spidermanTheme,
+  GameTheme.sungerbob: sungerbobTheme,
 };

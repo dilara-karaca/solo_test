@@ -33,31 +33,49 @@ class BoardState {
       }),
     );
 
-    // For fruits theme, shuffle fruit variants across all pegs
-    if (theme == GameTheme.fruits) {
-      // Collect all peg positions
-      final pegPositions = <(int, int)>[];
-      for (int row = 0; row < board.length; row++) {
-        for (int col = 0; col < board[row].length; col++) {
-          if (board[row][col].isPeg) {
-            pegPositions.add((row, col));
-          }
+    final pegPositions = <(int, int)>[];
+    for (int row = 0; row < board.length; row++) {
+      for (int col = 0; col < board[row].length; col++) {
+        if (board[row][col].isPeg) {
+          pegPositions.add((row, col));
         }
       }
+    }
 
-      // Create and shuffle fruit variants (0-4)
+    void assignRandomVariants(int variantCount) {
       final variants = <int>[];
-      final fruitsPerType = (pegPositions.length / 5).ceil();
-      for (int i = 0; i < 5; i++) {
-        variants.addAll(List.filled(fruitsPerType, i));
+      final piecesPerType = (pegPositions.length / variantCount).ceil();
+      for (int i = 0; i < variantCount; i++) {
+        variants.addAll(List.filled(piecesPerType, i));
       }
       variants.shuffle(random);
 
-      // Assign shuffled variants to pegs
       for (int i = 0; i < pegPositions.length; i++) {
         final (row, col) = pegPositions[i];
-        board[row][col] = board[row][col].copyWith(fruitVariant: variants[i]);
+        board[row][col] = board[row][col].copyWith(pieceVariant: variants[i]);
       }
+    }
+
+    void assignAlternatingVariants() {
+      for (final (row, col) in pegPositions) {
+        board[row][col] = board[row][col].copyWith(
+          pieceVariant: (row + col) % 2,
+        );
+      }
+    }
+
+    switch (theme) {
+      case GameTheme.fruits:
+        assignRandomVariants(5);
+        break;
+      case GameTheme.powerpuffGirls:
+        assignRandomVariants(3);
+        break;
+      case GameTheme.sungerbob:
+        assignAlternatingVariants();
+        break;
+      default:
+        break;
     }
 
     return BoardState(
