@@ -18,23 +18,28 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
     with TickerProviderStateMixin {
   late final AnimationController _bgController;
   late final PageController _pageController;
+  late final int _initialPage;
   double _pageOffset = 0;
+  double _dragStartPage = 0;
+  double _dragDeltaX = 0;
 
   final List<GameTheme> _themes = GameTheme.values;
 
   @override
   void initState() {
     super.initState();
+    _initialPage = _themes.length * 1000;
+    _pageOffset = _initialPage.toDouble();
     _bgController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 6),
     )..repeat(reverse: true);
     _pageController = PageController(
       viewportFraction: 0.68,
-      initialPage: _themes.length * 1000,
+      initialPage: _initialPage,
     );
     _pageController.addListener(() {
-      setState(() => _pageOffset = _pageController.page ?? 0);
+      setState(() => _pageOffset = _pageController.page ?? _pageOffset);
     });
   }
 
@@ -58,14 +63,26 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
 
   void _handleCarouselDragUpdate(DragUpdateDetails details) {
     if (!_pageController.hasClients) return;
+    _dragDeltaX += details.delta.dx;
     final nextPixels = _pageController.offset - details.delta.dx;
     _pageController.jumpTo(nextPixels);
   }
 
+  void _handleCarouselDragStart(DragStartDetails details) {
+    if (!_pageController.hasClients) return;
+    _dragStartPage = _pageController.page ?? _pageOffset;
+    _dragDeltaX = 0;
+  }
+
   void _handleCarouselDragEnd(DragEndDetails details) {
     if (!_pageController.hasClients) return;
+    final draggedEnough = _dragDeltaX.abs() > 12;
+    final targetPage =
+        draggedEnough
+            ? (_dragStartPage + (_dragDeltaX < 0 ? 1 : -1)).round()
+            : _pageOffset.round();
     _pageController.animateToPage(
-      _pageOffset.round(),
+      targetPage,
       duration: const Duration(milliseconds: 280),
       curve: Curves.easeOutCubic,
     );
@@ -232,7 +249,7 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                         style: TextStyle(
                           color: selectedTheme.textPrimary.withOpacity(0.9),
                           fontSize: 14,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w900,
                           letterSpacing: 4.5,
                         ),
                       ),
@@ -243,7 +260,7 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
-                                selectedTheme.primaryLight.withOpacity(0.5),
+                                selectedTheme.primaryLight.withOpacity(0.65),
                                 Colors.transparent,
                               ],
                             ),
@@ -259,6 +276,7 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                         height: 420,
                         child: GestureDetector(
                           behavior: HitTestBehavior.translucent,
+                          onHorizontalDragStart: _handleCarouselDragStart,
                           onHorizontalDragUpdate: _handleCarouselDragUpdate,
                           onHorizontalDragEnd: _handleCarouselDragEnd,
                           child: ClipRect(
