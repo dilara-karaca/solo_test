@@ -28,7 +28,9 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
   @override
   void initState() {
     super.initState();
-    _initialPage = _themes.length * 1000;
+    final currentTheme = context.read<ThemeProvider>().currentTheme;
+    final currentThemeIndex = _themes.indexOf(currentTheme);
+    _initialPage = _themes.length * 1000 + currentThemeIndex;
     _pageOffset = _initialPage.toDouble();
     _bgController = AnimationController(
       vsync: this,
