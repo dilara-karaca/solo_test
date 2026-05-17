@@ -138,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'Tüm piyonları kaldırıp son piyonu\northaya bırakmaya çalışın.',
+                            'Stratejini kur ve tahtayı minimum piyonla bitir.',
                             style: TextStyle(
                               color: theme.textSecondary,
                               fontSize: 14,
