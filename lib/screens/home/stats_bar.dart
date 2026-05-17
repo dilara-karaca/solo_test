@@ -26,77 +26,55 @@ class _StatsBarState extends State<StatsBar> {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      child: Row(
-        children: [
-          Expanded(
-            child: ClipRRect(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
+            decoration: BoxDecoration(
+              color: theme.glassColor,
               borderRadius: BorderRadius.circular(18),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: theme.glassColor,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: theme.glassBorder),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _StatItem(
-                          label: 'EN İYİ',
-                          value: _storage.getBestScore().toString(),
-                          icon: Icons.star_rounded,
-                          color: const Color(0xFFF59E0B),
-                          textColor: theme.textPrimary,
-                          labelColor: theme.textSecondary,
-                        ),
-                      ),
-                      Container(width: 1, height: 38, color: theme.glassBorder),
-                      Expanded(
-                        child: _StatItem(
-                          label: 'OYUNLAR',
-                          value: _storage.getGamesPlayed().toString(),
-                          icon: Icons.sports_esports_rounded,
-                          color: theme.primaryLight,
-                          textColor: theme.textPrimary,
-                          labelColor: theme.textSecondary,
-                        ),
-                      ),
-                      Container(width: 1, height: 38, color: theme.glassBorder),
-                      Expanded(
-                        child: _StatItem(
-                          label: 'ORTALAMA',
-                          value: _storage.getAverageScore().toStringAsFixed(0),
-                          icon: Icons.trending_up_rounded,
-                          color: theme.accentColor,
-                          textColor: theme.textPrimary,
-                          labelColor: theme.textSecondary,
-                        ),
-                      ),
-                    ],
+              border: Border.all(color: theme.glassBorder),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _StatItem(
+                    label: 'EN İYİ',
+                    value: _storage.getBestScore().toString(),
+                    icon: Icons.star_rounded,
+                    color: const Color(0xFFF59E0B),
+                    textColor: theme.textPrimary,
+                    labelColor: theme.textSecondary,
                   ),
                 ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(18),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-              child: Container(
-                width: 50, height: 50,
-                decoration: BoxDecoration(
-                  color: theme.glassColor,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: theme.glassBorder),
+                Container(width: 1, height: 38, color: theme.glassBorder),
+                Expanded(
+                  child: _StatItem(
+                    label: 'OYUNLAR',
+                    value: _storage.getGamesPlayed().toString(),
+                    icon: Icons.sports_esports_rounded,
+                    color: theme.primaryLight,
+                    textColor: theme.textPrimary,
+                    labelColor: theme.textSecondary,
+                  ),
                 ),
-                child: Center(child: Icon(Icons.person_rounded, color: theme.primaryLight)),
-              ),
+                Container(width: 1, height: 38, color: theme.glassBorder),
+                Expanded(
+                  child: _StatItem(
+                    label: 'ORTALAMA',
+                    value: _storage.getAverageScore().toStringAsFixed(0),
+                    icon: Icons.trending_up_rounded,
+                    color: theme.accentColor,
+                    textColor: theme.textPrimary,
+                    labelColor: theme.textSecondary,
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -126,9 +104,19 @@ class _StatItem extends StatelessWidget {
       children: [
         Icon(icon, color: color, size: 15),
         const SizedBox(height: 5),
-        Text(value, style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold)),
+        Text(
+          value,
+          style: TextStyle(
+            color: textColor,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: 3),
-        Text(label, style: TextStyle(color: labelColor, fontSize: 10, letterSpacing: 0.5)),
+        Text(
+          label,
+          style: TextStyle(color: labelColor, fontSize: 10, letterSpacing: 0.5),
+        ),
       ],
     );
   }

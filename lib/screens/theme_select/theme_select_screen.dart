@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:solo_test/models/game_theme_model.dart';
@@ -15,8 +16,8 @@ class ThemeSelectScreen extends StatefulWidget {
 
 class _ThemeSelectScreenState extends State<ThemeSelectScreen>
     with TickerProviderStateMixin {
-  late AnimationController _bgController;
-  late PageController _pageController;
+  late final AnimationController _bgController;
+  late final PageController _pageController;
   double _pageOffset = 0;
 
   final List<GameTheme> _themes = GameTheme.values;
@@ -28,7 +29,10 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
       vsync: this,
       duration: const Duration(seconds: 6),
     )..repeat(reverse: true);
-    _pageController = PageController(viewportFraction: 0.65, initialPage: 0);
+    _pageController = PageController(
+      viewportFraction: 0.68,
+      initialPage: _themes.length * 1000,
+    );
     _pageController.addListener(() {
       setState(() => _pageOffset = _pageController.page ?? 0);
     });
@@ -42,28 +46,50 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
   }
 
   void _confirm() {
-    final selectedIndex = _pageOffset.round();
+    final selectedIndex = _loopIndex(_pageOffset.round());
     context.read<ThemeProvider>().setTheme(_themes[selectedIndex]);
     Navigator.of(context).pushReplacementNamed('/home');
   }
 
-  List<Widget> _buildCircularCards() {
-    const double radius = 160;
-    final double angleStep =
-        2 * math.pi / _themes.length; // kartları eşit şekilde dağıt
+  int _loopIndex(int index) {
+    final length = _themes.length;
+    return ((index % length) + length) % length;
+  }
+
+  void _handleCarouselDragUpdate(DragUpdateDetails details) {
+    if (!_pageController.hasClients) return;
+    final nextPixels = _pageController.offset - details.delta.dx;
+    _pageController.jumpTo(nextPixels);
+  }
+
+  void _handleCarouselDragEnd(DragEndDetails details) {
+    if (!_pageController.hasClients) return;
+    _pageController.animateToPage(
+      _pageOffset.round(),
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  List<Widget> _buildArcCards(int selectedIndex) {
+    const double cardSpacing = 180;
+    const double arcDepth = 22;
+    final themeCount = _themes.length;
+    final pageShift = _pageOffset - _pageOffset.roundToDouble();
+    final center = themeCount ~/ 2;
 
     return List.generate(_themes.length, (index) {
-      final angle = angleStep * (index - _pageOffset);
-      final offsetX = radius * math.sin(angle);
-      final offsetY = radius * math.cos(angle) - radius + 60;
+      final slot = index - center;
+      final themeIndex = _loopIndex(selectedIndex + slot);
+      final distance = slot - pageShift;
+      final offsetX = distance * cardSpacing;
+      final offsetY = math.pow(distance.abs(), 1.35).toDouble() * arcDepth;
+      final scale = (1 - (distance.abs() * 0.1)).clamp(0.66, 1.0);
+      final opacity = (1 - (distance.abs() * 0.26)).clamp(0.14, 1.0);
 
-      // Derinlik hesapla - açıya göre ölçek ve opacity
-      final depthFactor = (math.cos(angle) + 1) / 2; // 0 ile 1 arasında
-      final scale = 0.75 + (depthFactor * 0.25);
-      final opacity = 0.5 + (depthFactor * 0.5);
-
-      final t = allThemes[_themes[index]]!;
-      final isSelected = (index - _pageOffset).abs() < 0.5;
+      final themeData = allThemes[_themes[themeIndex]]!;
+      final isSelected = slot == 0;
+      final targetPage = _pageOffset.round() + slot;
 
       return Transform.translate(
         offset: Offset(offsetX, offsetY),
@@ -72,11 +98,11 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
           child: Opacity(
             opacity: opacity,
             child: _ThemeCircularCard(
-              themeData: t,
+              themeData: themeData,
               isSelected: isSelected,
               onTap: () {
                 _pageController.animateToPage(
-                  index,
+                  targetPage,
                   duration: const Duration(milliseconds: 600),
                   curve: Curves.easeOutCubic,
                 );
@@ -90,7 +116,7 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
 
   @override
   Widget build(BuildContext context) {
-    final selectedIndex = _pageOffset.round();
+    final selectedIndex = _loopIndex(_pageOffset.round());
     final selectedTheme = allThemes[_themes[selectedIndex]]!;
 
     return AnimatedContainer(
@@ -100,7 +126,6 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
         backgroundColor: Colors.transparent,
         body: Stack(
           children: [
-            // Animated background glows
             AnimatedBuilder(
               animation: _bgController,
               builder:
@@ -149,19 +174,15 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                     ],
                   ),
             ),
-
-            // Particles
             Positioned.fill(
               child: IgnorePointer(
                 child: ParticleOverlay(themeData: selectedTheme, count: 10),
               ),
             ),
-
             SafeArea(
               child: Column(
                 children: [
-                  const SizedBox(height: 48),
-                  // Title
+                  const SizedBox(height: 58),
                   ShaderMask(
                     shaderCallback:
                         (bounds) => LinearGradient(
@@ -170,52 +191,94 @@ class _ThemeSelectScreenState extends State<ThemeSelectScreen>
                             selectedTheme.accentColor,
                           ],
                         ).createShader(bounds),
-                    child: const Text(
+                    child: Text(
                       'SOLO TEST',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 38,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 10,
+                        shadows: [
+                          Shadow(
+                            color: selectedTheme.backgroundColor.withOpacity(
+                              0.35,
+                            ),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Tema Seç',
-                    style: TextStyle(
-                      color: selectedTheme.textSecondary,
-                      fontSize: 14,
-                      letterSpacing: 4,
-                    ),
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 1,
+                          margin: const EdgeInsets.only(right: 14),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.transparent,
+                                selectedTheme.primaryLight.withOpacity(0.5),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Text(
+                        'Tema Seç',
+                        style: TextStyle(
+                          color: selectedTheme.textPrimary.withOpacity(0.9),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 4.5,
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: 1,
+                          margin: const EdgeInsets.only(left: 14),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                selectedTheme.primaryLight.withOpacity(0.5),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 40),
-
-                  // Circular carousel theme cards
+                  const SizedBox(height: 30),
                   Expanded(
                     child: Center(
                       child: SizedBox(
-                        height: 400,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            // PageView for smooth scrolling
-                            PageView.builder(
-                              controller: _pageController,
-                              itemCount: _themes.length,
-                              itemBuilder: (context, index) {
-                                return const SizedBox.expand();
-                              },
+                        height: 420,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onHorizontalDragUpdate: _handleCarouselDragUpdate,
+                          onHorizontalDragEnd: _handleCarouselDragEnd,
+                          child: ClipRect(
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                PageView.builder(
+                                  controller: _pageController,
+                                  itemBuilder: (context, index) {
+                                    return const SizedBox.expand();
+                                  },
+                                ),
+                                ..._buildArcCards(selectedIndex),
+                              ],
                             ),
-                            // Circular positioned cards
-                            ..._buildCircularCards(),
-                          ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-
-                  // Start button
                   Padding(
                     padding: const EdgeInsets.fromLTRB(24, 8, 24, 40),
                     child: _StartButton(
@@ -251,8 +314,8 @@ class _ThemeCircularCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 400),
         curve: Curves.easeOutCubic,
-        width: 240,
-        height: 320,
+        width: 220,
+        height: 300,
         decoration: BoxDecoration(
           color:
               isSelected
@@ -284,43 +347,60 @@ class _ThemeCircularCard extends StatelessWidget {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(14),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Large board preview
                   _LargeBoardPreview(themeData: themeData),
-                  const SizedBox(height: 14),
-                  // Theme name
-                  Text(
-                    themeData.name,
-                    style: TextStyle(
-                      color:
-                          isSelected
-                              ? themeData.primaryLight
-                              : themeData.textPrimary,
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.5,
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 4,
                     ),
-                    textAlign: TextAlign.center,
+                    decoration: BoxDecoration(
+                      color: themeData.surfaceColor.withOpacity(
+                        isSelected ? 0.9 : 0.78,
+                      ),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: themeData.primaryLight.withOpacity(0.3),
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      themeData.name,
+                      style: TextStyle(
+                        color: themeData.textPrimary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.2,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                   const SizedBox(height: 6),
-                  // Theme description
                   Text(
                     themeData.description,
                     style: TextStyle(
                       color: themeData.textSecondary,
                       fontSize: 11,
-                      letterSpacing: 0.3,
-                      height: 1.4,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.2,
+                      height: 1.35,
                     ),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 10),
-                  // Selection indicator
+                  const SizedBox(height: 8),
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 250),
                     width: 28,
@@ -365,7 +445,6 @@ class _LargeBoardPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Simplified cross-shape of the solitaire board (7x7 version for better preview)
     const valid = [
       false,
       false,
@@ -445,7 +524,6 @@ class _LargeBoardPreview extends StatelessWidget {
               ),
             );
           }
-          // Center is empty hole
           if (i == 24) {
             return Container(
               decoration: BoxDecoration(
@@ -491,7 +569,7 @@ class _StartButton extends StatefulWidget {
 
 class _StartButtonState extends State<_StartButton>
     with SingleTickerProviderStateMixin {
-  late AnimationController _ctrl;
+  late final AnimationController _ctrl;
 
   @override
   void initState() {
