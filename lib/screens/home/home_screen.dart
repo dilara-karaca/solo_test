@@ -53,36 +53,45 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         children: [
           AnimatedBuilder(
             animation: _pulseAnim,
-            builder: (context, _) => Stack(
-              children: [
-                Positioned(
-                  top: -90, right: -70,
-                  child: Opacity(
-                    opacity: _pulseAnim.value * 0.45,
-                    child: Container(
-                      width: 300, height: 300,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: RadialGradient(colors: [theme.primaryColor, Colors.transparent]),
+            builder:
+                (context, _) => Stack(
+                  children: [
+                    Positioned(
+                      top: -90,
+                      right: -70,
+                      child: Opacity(
+                        opacity: _pulseAnim.value * 0.45,
+                        child: Container(
+                          width: 300,
+                          height: 300,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: RadialGradient(
+                              colors: [theme.primaryColor, Colors.transparent],
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 80, left: -80,
-                  child: Opacity(
-                    opacity: (1.0 - _pulseAnim.value) * 0.35,
-                    child: Container(
-                      width: 220, height: 220,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: RadialGradient(colors: [theme.accentColor, Colors.transparent]),
+                    Positioned(
+                      bottom: 80,
+                      left: -80,
+                      child: Opacity(
+                        opacity: (1.0 - _pulseAnim.value) * 0.35,
+                        child: Container(
+                          width: 220,
+                          height: 220,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: RadialGradient(
+                              colors: [theme.accentColor, Colors.transparent],
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
           ),
           // Floating particles
           Positioned.fill(
@@ -101,27 +110,47 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       child: Column(
                         children: [
                           const SizedBox(height: 44),
-                          _HeroIcon(pulseAnim: _pulseAnim, orbitController: _orbitController, theme: theme),
+                          _HeroIcon(
+                            pulseAnim: _pulseAnim,
+                            orbitController: _orbitController,
+                            theme: theme,
+                          ),
                           const SizedBox(height: 36),
                           ShaderMask(
-                            shaderCallback: (bounds) => LinearGradient(
-                              colors: [theme.primaryLight, theme.accentColor],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                            ).createShader(bounds),
+                            shaderCallback:
+                                (bounds) => LinearGradient(
+                                  colors: [
+                                    theme.primaryLight,
+                                    theme.accentColor,
+                                  ],
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                ).createShader(bounds),
                             child: const Text(
                               'SOLO TEST',
-                              style: TextStyle(color: Colors.white, fontSize: 34, fontWeight: FontWeight.w900, letterSpacing: 10),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 34,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 10,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             'Tüm piyonları kaldırıp son piyonu\northaya bırakmaya çalışın.',
-                            style: TextStyle(color: theme.textSecondary, fontSize: 14),
+                            style: TextStyle(
+                              color: theme.textSecondary,
+                              fontSize: 14,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 52),
-                          _PlayButton(theme: theme, onPressed: () => Navigator.of(context).pushNamed('/game')),
+                          _PlayButton(
+                            theme: theme,
+                            onPressed:
+                                () => Navigator.of(context).pushNamed('/game'),
+                          ),
                           const SizedBox(height: 14),
                           Row(
                             children: [
@@ -130,7 +159,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   icon: Icons.info_outline_rounded,
                                   label: 'KURALLAR',
                                   theme: theme,
-                                  onPressed: () => Navigator.of(context).pushNamed('/rules'),
+                                  onPressed:
+                                      () => Navigator.of(
+                                        context,
+                                      ).pushNamed('/rules'),
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -141,7 +173,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   theme: theme,
                                   onPressed: () {
                                     Navigator.of(context).pushAndRemoveUntil(
-                                      MaterialPageRoute(builder: (_) => const ThemeSelectScreen()),
+                                      MaterialPageRoute(
+                                        builder:
+                                            (_) => const ThemeSelectScreen(),
+                                      ),
                                       (route) => false,
                                     );
                                   },
@@ -169,7 +204,11 @@ class _HeroIcon extends StatelessWidget {
   final AnimationController orbitController;
   final GameThemeData theme;
 
-  const _HeroIcon({required this.pulseAnim, required this.orbitController, required this.theme});
+  const _HeroIcon({
+    required this.pulseAnim,
+    required this.orbitController,
+    required this.theme,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -177,21 +216,32 @@ class _HeroIcon extends StatelessWidget {
       animation: Listenable.merge([pulseAnim, orbitController]),
       builder: (context, _) {
         return SizedBox(
-          width: 180, height: 180,
+          width: 180,
+          height: 180,
           child: Stack(
             alignment: Alignment.center,
             children: [
               Container(
-                width: 180, height: 180,
+                width: 180,
+                height: 180,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  boxShadow: [BoxShadow(color: theme.primaryColor.withOpacity(pulseAnim.value * 0.45), blurRadius: 50, spreadRadius: 8)],
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.primaryColor.withOpacity(
+                        pulseAnim.value * 0.45,
+                      ),
+                      blurRadius: 50,
+                      spreadRadius: 8,
+                    ),
+                  ],
                 ),
               ),
               Transform.rotate(
                 angle: orbitController.value * 2 * math.pi,
                 child: SizedBox(
-                  width: 180, height: 180,
+                  width: 180,
+                  height: 180,
                   child: Stack(
                     children: List.generate(8, (i) {
                       final angle = (i / 8) * 2 * math.pi;
@@ -199,8 +249,14 @@ class _HeroIcon extends StatelessWidget {
                         left: 90 + 82 * math.cos(angle) - 4,
                         top: 90 + 82 * math.sin(angle) - 4,
                         child: Container(
-                          width: 7, height: 7,
-                          decoration: BoxDecoration(shape: BoxShape.circle, color: theme.primaryLight.withOpacity(i.isEven ? 0.7 : 0.3)),
+                          width: 7,
+                          height: 7,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: theme.primaryLight.withOpacity(
+                              i.isEven ? 0.7 : 0.3,
+                            ),
+                          ),
                         ),
                       );
                     }),
@@ -211,11 +267,17 @@ class _HeroIcon extends StatelessWidget {
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                   child: Container(
-                    width: 130, height: 130,
+                    width: 130,
+                    height: 130,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: theme.primaryColor.withOpacity(0.12),
-                      border: Border.all(color: theme.primaryColor.withOpacity(0.4 + pulseAnim.value * 0.3), width: 1.5),
+                      border: Border.all(
+                        color: theme.primaryColor.withOpacity(
+                          0.4 + pulseAnim.value * 0.3,
+                        ),
+                        width: 1.5,
+                      ),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(22),
@@ -242,15 +304,28 @@ class _MiniBoard extends StatelessWidget {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, mainAxisSpacing: 5, crossAxisSpacing: 5),
-      itemCount: 9,
-      itemBuilder: (context, i) => Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: cells[i] ? theme.piecePrimary : theme.boardHole,
-          boxShadow: cells[i] ? [BoxShadow(color: theme.piecePrimary.withOpacity(0.5), blurRadius: 6)] : null,
-        ),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        mainAxisSpacing: 5,
+        crossAxisSpacing: 5,
       ),
+      itemCount: 9,
+      itemBuilder:
+          (context, i) => Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: cells[i] ? theme.piecePrimary : theme.boardHole,
+              boxShadow:
+                  cells[i]
+                      ? [
+                        BoxShadow(
+                          color: theme.piecePrimary.withOpacity(0.5),
+                          blurRadius: 6,
+                        ),
+                      ]
+                      : null,
+            ),
+          ),
     );
   }
 }
@@ -264,39 +339,69 @@ class _PlayButton extends StatefulWidget {
   State<_PlayButton> createState() => _PlayButtonState();
 }
 
-class _PlayButtonState extends State<_PlayButton> with SingleTickerProviderStateMixin {
+class _PlayButtonState extends State<_PlayButton>
+    with SingleTickerProviderStateMixin {
   late AnimationController _ctrl;
 
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 90), lowerBound: 0.95, upperBound: 1.0, value: 1.0);
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 90),
+      lowerBound: 0.95,
+      upperBound: 1.0,
+      value: 1.0,
+    );
   }
 
   @override
-  void dispose() { _ctrl.dispose(); super.dispose(); }
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: (_) => _ctrl.reverse(),
-      onTapUp: (_) { _ctrl.forward(); widget.onPressed(); },
+      onTapUp: (_) {
+        _ctrl.forward();
+        widget.onPressed();
+      },
       onTapCancel: () => _ctrl.forward(),
       child: ScaleTransition(
         scale: _ctrl,
         child: Container(
-          width: double.infinity, height: 62,
+          width: double.infinity,
+          height: 62,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(colors: [widget.theme.primaryColor, widget.theme.primaryDark]),
-            boxShadow: [BoxShadow(color: widget.theme.primaryColor.withOpacity(0.45), blurRadius: 24, offset: const Offset(0, 8))],
+            gradient: LinearGradient(
+              colors: [widget.theme.primaryColor, widget.theme.primaryDark],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: widget.theme.primaryColor.withOpacity(0.45),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.play_arrow_rounded, color: Colors.white, size: 30),
               SizedBox(width: 10),
-              Text('OYNA', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 5)),
+              Text(
+                'OYNA',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 5,
+                ),
+              ),
             ],
           ),
         ),
@@ -311,7 +416,12 @@ class _GlassButton extends StatelessWidget {
   final VoidCallback onPressed;
   final GameThemeData theme;
 
-  const _GlassButton({required this.icon, required this.label, required this.onPressed, required this.theme});
+  const _GlassButton({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+    required this.theme,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -331,9 +441,17 @@ class _GlassButton extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, color: theme.primaryLight, size: 17),
+                Icon(icon, color: theme.textPrimary, size: 17),
                 const SizedBox(width: 8),
-                Text(label, style: TextStyle(color: theme.primaryLight, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: theme.textPrimary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
+                  ),
+                ),
               ],
             ),
           ),
