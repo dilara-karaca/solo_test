@@ -71,6 +71,9 @@ class BoardState {
       case GameTheme.powerpuffGirls:
         assignRandomVariants(3);
         break;
+      case GameTheme.stitch:
+        assignRandomVariants(2);
+        break;
       case GameTheme.sungerbob:
         assignAlternatingVariants();
         break;

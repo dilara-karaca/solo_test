@@ -11,6 +11,7 @@ enum GameTheme {
   sungerbob,
   winniePooh,
   batman,
+  stitch,
 }
 
 class GameThemeData {
@@ -464,6 +465,45 @@ const batmanTheme = GameThemeData(
   glassBorder: Color(0x242F80ED),
 );
 
+const stitchTheme = GameThemeData(
+  id: 'stitch',
+  name: 'STITCH',
+  emoji: '👽',
+  description: 'Mavi kaos ve Lilo & Stitch enerjisi',
+  pieceAssets: [
+    'assets/images/stitch/stitch.png',
+    'assets/images/stitch/rosa.png',
+  ],
+  pieceAsset: null,
+  pieceEmoji: '👽',
+  particles: ['👽', '🌺', '✨', '💙'],
+  useAssetPiece: true,
+  backgroundColor: Color(0xFFEAF6FF),
+  backgroundGlow1: Color(0xFF66CCFF),
+  backgroundGlow2: Color(0xFF7C4DFF),
+  boardBackground: Color(0xFFF3FBFF),
+  boardBorder: Color(0xFF9ED8F4),
+  boardHole: Color(0xFFDFF4FF),
+  boardEmpty: Color(0x00000000),
+  piecePrimary: Color(0xFF66CCFF),
+  pieceDark: Color(0xFF1D4ED8),
+  pieceHighlight: Color(0xFFA6E3FF),
+  pieceSelected: Color(0xFFFFB6C1),
+  primaryColor: Color(0xFF66CCFF),
+  primaryDark: Color(0xFF1D4ED8),
+  primaryLight: Color(0xFFA6E3FF),
+  accentColor: Color(0xFFFFB6C1),
+  surfaceColor: Color(0xFFF3FBFF),
+  surfaceLight: Color(0xFFE8F7FF),
+  borderLight: Color(0xFF9ED8F4),
+  borderGlow: Color(0x5566CCFF),
+  validMoveColor: Color(0xFF22C55E),
+  textPrimary: Color(0xFF1F4E79),
+  textSecondary: Color(0xFF4B7A9E),
+  glassColor: Color(0x1666CCFF),
+  glassBorder: Color(0x2466CCFF),
+);
+
 // All themes map in the desired display order
 const Map<GameTheme, GameThemeData> allThemes = {
   GameTheme.classic: classicTheme,
@@ -476,4 +516,5 @@ const Map<GameTheme, GameThemeData> allThemes = {
   GameTheme.sungerbob: sungerbobTheme,
   GameTheme.winniePooh: winniePoohTheme,
   GameTheme.batman: batmanTheme,
+  GameTheme.stitch: stitchTheme,
 };
