@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum GameTheme { classic, cat, hellokitty, cars }
+enum GameTheme { classic, cat, hellokitty, cars, fruits }
 
 class GameThemeData {
   final String id;
@@ -187,6 +187,41 @@ const carsTheme = GameThemeData(
   glassBorder: Color(0x25FF5252),
 );
 
+const fruitsTheme = GameThemeData(
+  id: 'fruits',
+  name: 'MEYVELER',
+  emoji: '🍎',
+  description: 'Renkli meyve sepeti — taze ve canlı',
+  pieceAsset: null,
+  pieceEmoji: '🍎',
+  particles: ['🍎', '🍌', '🫐', '🥝', '🍓', '🌱', '✨'],
+  useAssetPiece: false,
+  backgroundColor: Color(0xFFF8F8F0),
+  backgroundGlow1: Color(0xFFFF6B6B),
+  backgroundGlow2: Color(0xFFFFD93D),
+  boardBackground: Color(0xFFFBFBF5),
+  boardBorder: Color(0xFFE8D5C4),
+  boardHole: Color(0xFFF0EDEA),
+  boardEmpty: Color(0x00000000),
+  piecePrimary: Color(0xFFFF6B6B),
+  pieceDark: Color(0xFFE53935),
+  pieceHighlight: Color(0xFFFF8A80),
+  pieceSelected: Color(0xFFFFD93D),
+  primaryColor: Color(0xFFFF6B6B),
+  primaryDark: Color(0xFFE53935),
+  primaryLight: Color(0xFFFF8A80),
+  accentColor: Color(0xFFFFD93D),
+  surfaceColor: Color(0xFFFBFBF5),
+  surfaceLight: Color(0xFFFDFDF9),
+  borderLight: Color(0xFFE8D5C4),
+  borderGlow: Color(0x55FF6B6B),
+  validMoveColor: Color(0xFF6BCB77),
+  textPrimary: Color(0xFF2D3142),
+  textSecondary: Color(0xFF4D576A),
+  glassColor: Color(0x12FF6B6B),
+  glassBorder: Color(0x20FF6B6B),
+);
+
 // existing themes map is defined below with the added `cat` theme
 
 const catTheme = GameThemeData(
@@ -230,4 +265,5 @@ const Map<GameTheme, GameThemeData> allThemes = {
   GameTheme.cat: catTheme,
   GameTheme.hellokitty: hellokittyTheme,
   GameTheme.cars: carsTheme,
+  GameTheme.fruits: fruitsTheme,
 };

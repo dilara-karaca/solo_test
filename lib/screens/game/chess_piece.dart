@@ -81,9 +81,16 @@ class _ChessPieceState extends State<ChessPiece>
       },
       child: Padding(
         padding: const EdgeInsets.all(3),
-        child: t.useAssetPiece && t.pieceAsset != null
-            ? _AssetPiece(themeData: t, isActive: isActive)
-            : _GradientPiece(themeData: t, isActive: isActive),
+        child:
+            t.useAssetPiece && t.pieceAsset != null
+                ? _AssetPiece(themeData: t, isActive: isActive)
+                : widget.piece.fruitVariant != null
+                ? _FruitPiece(
+                  themeData: t,
+                  isActive: isActive,
+                  fruitVariant: widget.piece.fruitVariant!,
+                )
+                : _GradientPiece(themeData: t, isActive: isActive),
       ),
     );
   }
@@ -102,9 +109,10 @@ class _AssetPiece extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: isActive
-            ? themeData.pieceSelected.withOpacity(0.22)
-            : themeData.piecePrimary.withOpacity(0.10),
+        color:
+            isActive
+                ? themeData.pieceSelected.withOpacity(0.22)
+                : themeData.piecePrimary.withOpacity(0.10),
         boxShadow: [
           BoxShadow(
             color: (isActive ? themeData.pieceSelected : themeData.piecePrimary)
@@ -113,12 +121,10 @@ class _AssetPiece extends StatelessWidget {
             spreadRadius: isActive ? 3 : 0,
           ),
         ],
-        border: isActive
-            ? Border.all(
-                color: themeData.pieceSelected,
-                width: 2.5,
-              )
-            : null,
+        border:
+            isActive
+                ? Border.all(color: themeData.pieceSelected, width: 2.5)
+                : null,
       ),
       child: ClipOval(
         child: Padding(
@@ -149,17 +155,18 @@ class _GradientPiece extends StatelessWidget {
         gradient: RadialGradient(
           center: const Alignment(-0.35, -0.4),
           radius: 0.85,
-          colors: isActive
-              ? [
-                  Colors.white.withOpacity(0.9),
-                  themeData.pieceSelected,
-                  themeData.pieceDark,
-                ]
-              : [
-                  themeData.pieceHighlight.withOpacity(0.95),
-                  themeData.piecePrimary,
-                  themeData.pieceDark,
-                ],
+          colors:
+              isActive
+                  ? [
+                    Colors.white.withOpacity(0.9),
+                    themeData.pieceSelected,
+                    themeData.pieceDark,
+                  ]
+                  : [
+                    themeData.pieceHighlight.withOpacity(0.95),
+                    themeData.piecePrimary,
+                    themeData.pieceDark,
+                  ],
           stops: const [0.0, 0.5, 1.0],
         ),
         boxShadow: [
@@ -175,6 +182,57 @@ class _GradientPiece extends StatelessWidget {
             offset: Offset(0, 3),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Fruit emoji piece (for Fruits theme)
+class _FruitPiece extends StatelessWidget {
+  final GameThemeData themeData;
+  final bool isActive;
+  final int fruitVariant; // 0-4: apple, banana, blueberry, kiwi, strawberry
+
+  const _FruitPiece({
+    required this.themeData,
+    required this.isActive,
+    required this.fruitVariant,
+  });
+
+  String get _fruitEmoji {
+    const fruits = ['🍎', '🍌', '🫐', '🥝', '🍓'];
+    return fruits[fruitVariant.clamp(0, 4)];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color:
+            isActive
+                ? themeData.pieceSelected.withOpacity(0.22)
+                : themeData.piecePrimary.withOpacity(0.10),
+        boxShadow: [
+          BoxShadow(
+            color: (isActive ? themeData.pieceSelected : themeData.piecePrimary)
+                .withOpacity(isActive ? 0.75 : 0.35),
+            blurRadius: isActive ? 18 : 7,
+            spreadRadius: isActive ? 3 : 0,
+          ),
+        ],
+        border:
+            isActive
+                ? Border.all(color: themeData.pieceSelected, width: 2.5)
+                : null,
+      ),
+      child: Center(
+        child: Text(
+          _fruitEmoji,
+          style: const TextStyle(fontSize: 36),
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }

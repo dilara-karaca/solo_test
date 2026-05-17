@@ -1,17 +1,21 @@
 import 'package:solo_test/core/constants/app_constants.dart';
 import 'package:solo_test/models/board_state.dart';
 import 'package:solo_test/models/game_result.dart';
+import 'package:solo_test/models/game_theme_model.dart';
 import 'move_validator.dart';
 
 class GameEngine {
   BoardState boardState;
   List<Map<String, int>> moveHistory = [];
   DateTime? gameStartTime;
+  GameTheme? currentTheme;
 
-  GameEngine() : boardState = BoardState.initial(AppConstants.BOARD_SIZE);
+  GameEngine({this.currentTheme})
+    : boardState = BoardState.initial(AppConstants.BOARD_SIZE, theme: null);
 
-  void initializeGame() {
-    boardState = BoardState.initial(AppConstants.BOARD_SIZE);
+  void initializeGame({GameTheme? theme}) {
+    currentTheme = theme;
+    boardState = BoardState.initial(AppConstants.BOARD_SIZE, theme: theme);
     moveHistory = [];
     gameStartTime = DateTime.now();
   }

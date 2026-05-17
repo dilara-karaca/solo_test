@@ -37,8 +37,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    gameEngine = GameEngine();
-    gameEngine.initializeGame();
+    final theme = context.read<ThemeProvider>().currentTheme;
+    gameEngine = GameEngine(currentTheme: theme);
+    gameEngine.initializeGame(theme: theme);
     validMoves = _emptyMoves();
 
     _celebCtrl = AnimationController(
@@ -204,7 +205,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                             onPressed: () {
                               Navigator.pop(context);
                               setState(() {
-                                gameEngine.initializeGame();
+                                final theme =
+                                    context.read<ThemeProvider>().currentTheme;
+                                gameEngine.initializeGame(theme: theme);
                                 _clearSelection();
                               });
                             },

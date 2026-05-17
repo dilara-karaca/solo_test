@@ -1,4 +1,6 @@
+import 'dart:math';
 import 'package:solo_test/core/constants/app_constants.dart';
+import 'package:solo_test/models/game_theme_model.dart';
 import 'piece.dart';
 
 class BoardState {
@@ -12,7 +14,8 @@ class BoardState {
     this.moveHistory = const [],
   });
 
-  factory BoardState.initial(int boardSize) {
+  factory BoardState.initial(int boardSize, {GameTheme? theme}) {
+    final random = Random();
     final board = List.generate(
       boardSize,
       (row) => List.generate(boardSize, (col) {
@@ -26,7 +29,15 @@ class BoardState {
           return Piece(row: row, column: col, isPeg: false);
         }
         // All other positions have pegs
-        return Piece(row: row, column: col, isPeg: true);
+        // For fruits theme, assign random fruit variants (0-4)
+        final fruitVariant =
+            theme == GameTheme.fruits ? random.nextInt(5) : null;
+        return Piece(
+          row: row,
+          column: col,
+          isPeg: true,
+          fruitVariant: fruitVariant,
+        );
       }),
     );
 
