@@ -187,7 +187,7 @@ class _GradientPiece extends StatelessWidget {
   }
 }
 
-/// Fruit emoji piece (for Fruits theme)
+/// Fruit image piece (for Fruits theme)
 class _FruitPiece extends StatelessWidget {
   final GameThemeData themeData;
   final bool isActive;
@@ -199,8 +199,14 @@ class _FruitPiece extends StatelessWidget {
     required this.fruitVariant,
   });
 
-  String get _fruitEmoji {
-    const fruits = ['🍎', '🍌', '🫐', '🥝', '🍓'];
+  String get _fruitAsset {
+    const fruits = [
+      'assets/images/fruits/apple.png',
+      'assets/images/fruits/banana.png',
+      'assets/images/fruits/blueberry.png',
+      'assets/images/fruits/kiwi.png',
+      'assets/images/fruits/strawberry.png',
+    ];
     return fruits[fruitVariant.clamp(0, 4)];
   }
 
@@ -227,11 +233,14 @@ class _FruitPiece extends StatelessWidget {
                 ? Border.all(color: themeData.pieceSelected, width: 2.5)
                 : null,
       ),
-      child: Center(
-        child: Text(
-          _fruitEmoji,
-          style: const TextStyle(fontSize: 36),
-          textAlign: TextAlign.center,
+      child: ClipOval(
+        child: Padding(
+          padding: const EdgeInsets.all(0),
+          child: Image.asset(
+            _fruitAsset,
+            fit: BoxFit.cover,
+            filterQuality: FilterQuality.high,
+          ),
         ),
       ),
     );
