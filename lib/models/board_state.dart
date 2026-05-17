@@ -1,4 +1,6 @@
+import 'dart:math';
 import 'package:solo_test/core/constants/app_constants.dart';
+import 'package:solo_test/models/game_theme_model.dart';
 import 'piece.dart';
 
 class BoardState {
@@ -12,7 +14,8 @@ class BoardState {
     this.moveHistory = const [],
   });
 
-  factory BoardState.initial(int boardSize) {
+  factory BoardState.initial(int boardSize, {GameTheme? theme}) {
+    final random = Random();
     final board = List.generate(
       boardSize,
       (row) => List.generate(boardSize, (col) {
@@ -29,6 +32,51 @@ class BoardState {
         return Piece(row: row, column: col, isPeg: true);
       }),
     );
+
+    final pegPositions = <(int, int)>[];
+    for (int row = 0; row < board.length; row++) {
+      for (int col = 0; col < board[row].length; col++) {
+        if (board[row][col].isPeg) {
+          pegPositions.add((row, col));
+        }
+      }
+    }
+
+    void assignRandomVariants(int variantCount) {
+      final variants = <int>[];
+      final piecesPerType = (pegPositions.length / variantCount).ceil();
+      for (int i = 0; i < variantCount; i++) {
+        variants.addAll(List.filled(piecesPerType, i));
+      }
+      variants.shuffle(random);
+
+      for (int i = 0; i < pegPositions.length; i++) {
+        final (row, col) = pegPositions[i];
+        board[row][col] = board[row][col].copyWith(pieceVariant: variants[i]);
+      }
+    }
+
+    void assignAlternatingVariants() {
+      for (final (row, col) in pegPositions) {
+        board[row][col] = board[row][col].copyWith(
+          pieceVariant: (row + col) % 2,
+        );
+      }
+    }
+
+    switch (theme) {
+      case GameTheme.fruits:
+        assignRandomVariants(5);
+        break;
+      case GameTheme.powerpuffGirls:
+        assignRandomVariants(3);
+        break;
+      case GameTheme.sungerbob:
+        assignAlternatingVariants();
+        break;
+      default:
+        break;
+    }
 
     return BoardState(
       board: board,

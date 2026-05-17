@@ -1,9 +1,12 @@
 import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:solo_test/core/constants/app_colors.dart';
-import 'package:solo_test/core/constants/app_text_styles.dart';
+import 'package:provider/provider.dart';
+import 'package:solo_test/providers/theme_provider.dart';
+import 'package:solo_test/models/game_theme_model.dart';
+import 'package:solo_test/screens/theme_select/theme_select_screen.dart';
 import 'stats_bar.dart';
+import 'package:solo_test/widgets/particle_overlay.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -42,11 +45,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>().themeData;
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor: theme.backgroundColor,
       body: Stack(
         children: [
-          // Background glow orbs
           AnimatedBuilder(
             animation: _pulseAnim,
             builder:
@@ -60,13 +64,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         child: Container(
                           width: 300,
                           height: 300,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             gradient: RadialGradient(
-                              colors: [
-                                AppColors.primaryColor,
-                                Colors.transparent,
-                              ],
+                              colors: [theme.primaryColor, Colors.transparent],
                             ),
                           ),
                         ),
@@ -80,13 +81,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         child: Container(
                           width: 220,
                           height: 220,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             gradient: RadialGradient(
-                              colors: [
-                                AppColors.accentColor,
-                                Colors.transparent,
-                              ],
+                              colors: [theme.accentColor, Colors.transparent],
                             ),
                           ),
                         ),
@@ -95,8 +93,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ],
                 ),
           ),
-
-          // Main content
+          // Floating particles
+          Positioned.fill(
+            child: IgnorePointer(
+              child: ParticleOverlay(themeData: theme, count: 8),
+            ),
+          ),
           SafeArea(
             child: Column(
               children: [
@@ -111,37 +113,41 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           _HeroIcon(
                             pulseAnim: _pulseAnim,
                             orbitController: _orbitController,
+                            theme: theme,
                           ),
                           const SizedBox(height: 36),
                           ShaderMask(
                             shaderCallback:
-                                (bounds) => const LinearGradient(
+                                (bounds) => LinearGradient(
                                   colors: [
-                                    AppColors.primaryLight,
-                                    AppColors.accentColor,
+                                    theme.primaryLight,
+                                    theme.accentColor,
                                   ],
                                   begin: Alignment.centerLeft,
                                   end: Alignment.centerRight,
                                 ).createShader(bounds),
-                            child: Text(
+                            child: const Text(
                               'SOLO TEST',
-                              style: AppTextStyles.heading1.copyWith(
+                              style: TextStyle(
                                 color: Colors.white,
-                                letterSpacing: 10,
                                 fontSize: 34,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 10,
                               ),
                             ),
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'Tüm piyonları kaldırıp son piyonu\northaya bırakmaya çalışın.',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: AppColors.textSecondary,
+                            'Stratejini kur ve tahtayı minimum piyonla bitir.',
+                            style: TextStyle(
+                              color: theme.textSecondary,
+                              fontSize: 14,
                             ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 52),
                           _PlayButton(
+                            theme: theme,
                             onPressed:
                                 () => Navigator.of(context).pushNamed('/game'),
                           ),
@@ -152,20 +158,27 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 child: _GlassButton(
                                   icon: Icons.info_outline_rounded,
                                   label: 'KURALLAR',
-                                  onPressed: () {
-                                    Navigator.of(context).pushNamed('/rules');
-                                  },
+                                  theme: theme,
+                                  onPressed:
+                                      () => Navigator.of(
+                                        context,
+                                      ).pushNamed('/rules'),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: _GlassButton(
-                                  icon: Icons.tune_rounded,
-                                  label: 'AYARLAR',
+                                  icon: Icons.palette_outlined,
+                                  label: 'TEMA',
+                                  theme: theme,
                                   onPressed: () {
-                                    Navigator.of(
-                                      context,
-                                    ).pushNamed('/settings');
+                                    Navigator.of(context).pushAndRemoveUntil(
+                                      MaterialPageRoute(
+                                        builder:
+                                            (_) => const ThemeSelectScreen(),
+                                      ),
+                                      (route) => false,
+                                    );
                                   },
                                 ),
                               ),
@@ -189,8 +202,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 class _HeroIcon extends StatelessWidget {
   final Animation<double> pulseAnim;
   final AnimationController orbitController;
+  final GameThemeData theme;
 
-  const _HeroIcon({required this.pulseAnim, required this.orbitController});
+  const _HeroIcon({
+    required this.pulseAnim,
+    required this.orbitController,
+    required this.theme,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -203,7 +221,6 @@ class _HeroIcon extends StatelessWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // Outer glow
               Container(
                 width: 180,
                 height: 180,
@@ -211,7 +228,7 @@ class _HeroIcon extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primaryColor.withOpacity(
+                      color: theme.primaryColor.withOpacity(
                         pulseAnim.value * 0.45,
                       ),
                       blurRadius: 50,
@@ -220,7 +237,6 @@ class _HeroIcon extends StatelessWidget {
                   ],
                 ),
               ),
-              // Orbit ring dots
               Transform.rotate(
                 angle: orbitController.value * 2 * math.pi,
                 child: SizedBox(
@@ -229,17 +245,15 @@ class _HeroIcon extends StatelessWidget {
                   child: Stack(
                     children: List.generate(8, (i) {
                       final angle = (i / 8) * 2 * math.pi;
-                      final left = 90 + 82 * math.cos(angle) - 4;
-                      final top = 90 + 82 * math.sin(angle) - 4;
                       return Positioned(
-                        left: left,
-                        top: top,
+                        left: 90 + 82 * math.cos(angle) - 4,
+                        top: 90 + 82 * math.sin(angle) - 4,
                         child: Container(
                           width: 7,
                           height: 7,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: AppColors.primaryLight.withOpacity(
+                            color: theme.primaryLight.withOpacity(
                               i.isEven ? 0.7 : 0.3,
                             ),
                           ),
@@ -249,7 +263,6 @@ class _HeroIcon extends StatelessWidget {
                   ),
                 ),
               ),
-              // Inner glass circle
               ClipOval(
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
@@ -258,9 +271,9 @@ class _HeroIcon extends StatelessWidget {
                     height: 130,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.primaryColor.withOpacity(0.12),
+                      color: theme.primaryColor.withOpacity(0.12),
                       border: Border.all(
-                        color: AppColors.primaryColor.withOpacity(
+                        color: theme.primaryColor.withOpacity(
                           0.4 + pulseAnim.value * 0.3,
                         ),
                         width: 1.5,
@@ -268,7 +281,7 @@ class _HeroIcon extends StatelessWidget {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(22),
-                      child: _MiniBoard(),
+                      child: _MiniBoard(theme: theme),
                     ),
                   ),
                 ),
@@ -282,9 +295,11 @@ class _HeroIcon extends StatelessWidget {
 }
 
 class _MiniBoard extends StatelessWidget {
+  final GameThemeData theme;
+  const _MiniBoard({required this.theme});
+
   @override
   Widget build(BuildContext context) {
-    // 3x3 mini peg board (center empty)
     const cells = [true, true, true, true, false, true, true, true, true];
     return GridView.builder(
       shrinkWrap: true,
@@ -299,12 +314,12 @@ class _MiniBoard extends StatelessWidget {
           (context, i) => Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: cells[i] ? AppColors.primaryColor : AppColors.boardHole,
+              color: cells[i] ? theme.piecePrimary : theme.boardHole,
               boxShadow:
                   cells[i]
                       ? [
                         BoxShadow(
-                          color: AppColors.primaryColor.withOpacity(0.5),
+                          color: theme.piecePrimary.withOpacity(0.5),
                           blurRadius: 6,
                         ),
                       ]
@@ -317,7 +332,8 @@ class _MiniBoard extends StatelessWidget {
 
 class _PlayButton extends StatefulWidget {
   final VoidCallback onPressed;
-  const _PlayButton({required this.onPressed});
+  final GameThemeData theme;
+  const _PlayButton({required this.onPressed, required this.theme});
 
   @override
   State<_PlayButton> createState() => _PlayButtonState();
@@ -361,12 +377,12 @@ class _PlayButtonState extends State<_PlayButton>
           height: 62,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            gradient: const LinearGradient(
-              colors: [AppColors.primaryColor, AppColors.primaryDark],
+            gradient: LinearGradient(
+              colors: [widget.theme.primaryColor, widget.theme.primaryDark],
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primaryColor.withOpacity(0.45),
+                color: widget.theme.primaryColor.withOpacity(0.45),
                 blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
@@ -398,11 +414,13 @@ class _GlassButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onPressed;
+  final GameThemeData theme;
 
   const _GlassButton({
     required this.icon,
     required this.label,
     required this.onPressed,
+    required this.theme,
   });
 
   @override
@@ -416,19 +434,22 @@ class _GlassButton extends StatelessWidget {
           child: Container(
             height: 54,
             decoration: BoxDecoration(
-              color: AppColors.glassColor,
+              color: theme.glassColor,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.glassBorder),
+              border: Border.all(color: theme.glassBorder),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, color: AppColors.primaryLight, size: 17),
+                Icon(icon, color: theme.textPrimary, size: 17),
                 const SizedBox(width: 8),
                 Text(
                   label,
-                  style: AppTextStyles.buttonSmall.copyWith(
-                    color: AppColors.primaryLight,
+                  style: TextStyle(
+                    color: theme.textPrimary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
                   ),
                 ),
               ],

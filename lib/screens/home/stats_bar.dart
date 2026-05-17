@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:solo_test/core/constants/app_colors.dart';
-import 'package:solo_test/core/constants/app_text_styles.dart';
+import 'package:provider/provider.dart';
+import 'package:solo_test/providers/theme_provider.dart';
 import 'package:solo_test/services/storage_service.dart';
 
 class StatsBar extends StatefulWidget {
@@ -22,90 +22,59 @@ class _StatsBarState extends State<StatsBar> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>().themeData;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      child: Row(
-        children: [
-          Expanded(
-            child: ClipRRect(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
+            decoration: BoxDecoration(
+              color: theme.glassColor,
               borderRadius: BorderRadius.circular(18),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 14,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.glassColor,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: AppColors.glassBorder),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _StatItem(
-                          label: 'EN İYİ',
-                          value: _storage.getBestScore().toString(),
-                          icon: Icons.star_rounded,
-                          color: AppColors.warningColor,
-                        ),
-                      ),
-                      Container(
-                        width: 1,
-                        height: 38,
-                        color: AppColors.glassBorder,
-                      ),
-                      Expanded(
-                        child: _StatItem(
-                          label: 'OYUNLAR',
-                          value: _storage.getGamesPlayed().toString(),
-                          icon: Icons.sports_esports_rounded,
-                          color: AppColors.primaryLight,
-                        ),
-                      ),
-                      Container(
-                        width: 1,
-                        height: 38,
-                        color: AppColors.glassBorder,
-                      ),
-                      Expanded(
-                        child: _StatItem(
-                          label: 'ORTALAMA',
-                          value: _storage.getAverageScore().toStringAsFixed(0),
-                          icon: Icons.trending_up_rounded,
-                          color: AppColors.accentColor,
-                        ),
-                      ),
-                    ],
+              border: Border.all(color: theme.glassBorder),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _StatItem(
+                    label: 'EN İYİ',
+                    value: _storage.getBestScore().toString(),
+                    icon: Icons.star_rounded,
+                    color: const Color(0xFFF59E0B),
+                    textColor: theme.textPrimary,
+                    labelColor: theme.textSecondary,
                   ),
                 ),
-              ),
+                Container(width: 1, height: 38, color: theme.glassBorder),
+                Expanded(
+                  child: _StatItem(
+                    label: 'OYUNLAR',
+                    value: _storage.getGamesPlayed().toString(),
+                    icon: Icons.sports_esports_rounded,
+                    color: theme.primaryLight,
+                    textColor: theme.textPrimary,
+                    labelColor: theme.textSecondary,
+                  ),
+                ),
+                Container(width: 1, height: 38, color: theme.glassBorder),
+                Expanded(
+                  child: _StatItem(
+                    label: 'ORTALAMA',
+                    value: _storage.getAverageScore().toStringAsFixed(0),
+                    icon: Icons.trending_up_rounded,
+                    color: theme.accentColor,
+                    textColor: theme.textPrimary,
+                    labelColor: theme.textSecondary,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(18),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: AppColors.glassColor,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: AppColors.glassBorder),
-                ),
-                child: const Center(
-                  child: Icon(
-                    Icons.person_rounded,
-                    color: AppColors.primaryLight,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -116,12 +85,16 @@ class _StatItem extends StatelessWidget {
   final String value;
   final IconData icon;
   final Color color;
+  final Color textColor;
+  final Color labelColor;
 
   const _StatItem({
     required this.label,
     required this.value,
     required this.icon,
     required this.color,
+    required this.textColor,
+    required this.labelColor,
   });
 
   @override
@@ -133,14 +106,17 @@ class _StatItem extends StatelessWidget {
         const SizedBox(height: 5),
         Text(
           value,
-          style: AppTextStyles.heading3.copyWith(
-            color: AppColors.textPrimary,
+          style: TextStyle(
+            color: textColor,
             fontSize: 20,
-            letterSpacing: 0,
+            fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 3),
-        Text(label, style: AppTextStyles.labelSmall),
+        Text(
+          label,
+          style: TextStyle(color: labelColor, fontSize: 10, letterSpacing: 0.5),
+        ),
       ],
     );
   }
