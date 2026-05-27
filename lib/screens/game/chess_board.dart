@@ -49,8 +49,10 @@ class _ChessBoardState extends State<ChessBoard>
       vsync: this,
       duration: const Duration(milliseconds: 750),
     )..repeat(reverse: true);
-    _pulseAnim = Tween<double>(begin: 0.3, end: 1.0)
-        .animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
+    _pulseAnim = Tween<double>(
+      begin: 0.3,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -111,53 +113,62 @@ class _ChessBoardState extends State<ChessBoard>
                 final isDraggingSource =
                     _draggingRow == row && _draggingCol == col;
 
-                final pieceWidget = piece.isPeg && isValid
-                    ? LongPressDraggable<_DragPieceData>(
-                        data: _DragPieceData(row: row, col: col),
-                        dragAnchorStrategy: pointerDragAnchorStrategy,
-                        onDragStarted: () {
-                          setState(() {
-                            _draggingRow = row;
-                            _draggingCol = col;
-                          });
-                          widget.onPieceSelected(row, col);
-                        },
-                        onDraggableCanceled: (_, __) {
-                          if (mounted) setState(() { _draggingRow = null; _draggingCol = null; });
-                        },
-                        onDragEnd: (_) {
-                          if (mounted) setState(() { _draggingRow = null; _draggingCol = null; });
-                        },
-                        feedback: Material(
-                          color: Colors.transparent,
-                          child: SizedBox(
-                            width: 62,
-                            height: 62,
+                final pieceWidget =
+                    piece.isPeg && isValid
+                        ? Draggable<_DragPieceData>(
+                          data: _DragPieceData(row: row, col: col),
+                          dragAnchorStrategy: pointerDragAnchorStrategy,
+                          onDragStarted: () {
+                            setState(() {
+                              _draggingRow = row;
+                              _draggingCol = col;
+                            });
+                            widget.onPieceSelected(row, col);
+                          },
+                          onDraggableCanceled: (_, __) {
+                            if (mounted)
+                              setState(() {
+                                _draggingRow = null;
+                                _draggingCol = null;
+                              });
+                          },
+                          onDragEnd: (_) {
+                            if (mounted)
+                              setState(() {
+                                _draggingRow = null;
+                                _draggingCol = null;
+                              });
+                          },
+                          feedback: Material(
+                            color: Colors.transparent,
+                            child: SizedBox(
+                              width: 62,
+                              height: 62,
+                              child: ChessPiece(
+                                piece: piece,
+                                isSelected: true,
+                                isDragging: true,
+                                themeData: theme,
+                              ),
+                            ),
+                          ),
+                          childWhenDragging: Opacity(
+                            opacity: 0.2,
                             child: ChessPiece(
                               piece: piece,
-                              isSelected: true,
-                              isDragging: true,
+                              isSelected: isSelected,
+                              isDragging: isDraggingSource,
                               themeData: theme,
                             ),
                           ),
-                        ),
-                        childWhenDragging: Opacity(
-                          opacity: 0.2,
                           child: ChessPiece(
                             piece: piece,
                             isSelected: isSelected,
                             isDragging: isDraggingSource,
                             themeData: theme,
                           ),
-                        ),
-                        child: ChessPiece(
-                          piece: piece,
-                          isSelected: isSelected,
-                          isDragging: isDraggingSource,
-                          themeData: theme,
-                        ),
-                      )
-                    : null;
+                        )
+                        : null;
 
                 final cell = GestureDetector(
                   onTap: () {
@@ -189,12 +200,16 @@ class _ChessBoardState extends State<ChessBoard>
                 if (!isTarget) return cell;
 
                 return DragTarget<_DragPieceData>(
-                  onWillAcceptWithDetails: (details) =>
-                      details.data.row == widget.selectedRow &&
-                      details.data.col == widget.selectedCol,
+                  onWillAcceptWithDetails:
+                      (details) =>
+                          details.data.row == widget.selectedRow &&
+                          details.data.col == widget.selectedCol,
                   onAcceptWithDetails: (details) {
                     widget.onMoveMade(
-                      details.data.row, details.data.col, row, col,
+                      details.data.row,
+                      details.data.col,
+                      row,
+                      col,
                     );
                   },
                   builder: (context, candidateData, rejectedData) {
@@ -202,7 +217,8 @@ class _ChessBoardState extends State<ChessBoard>
                       isValid: isValid,
                       isSelected: isSelected,
                       isValidMove: true,
-                      pulseValue: candidateData.isNotEmpty ? 1.0 : _pulseAnim.value,
+                      pulseValue:
+                          candidateData.isNotEmpty ? 1.0 : _pulseAnim.value,
                       isDragHover: candidateData.isNotEmpty,
                       theme: theme,
                       child: cell,
@@ -276,7 +292,8 @@ class _BoardCell extends StatelessWidget {
             if (child != null) child!,
             Center(
               child: Container(
-                width: 9, height: 9,
+                width: 9,
+                height: 9,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: theme.validMoveColor.withOpacity(

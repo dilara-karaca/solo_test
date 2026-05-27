@@ -184,6 +184,28 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               ),
                             ],
                           ),
+                          const SizedBox(height: 12),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextButton.icon(
+                              onPressed:
+                                  () => Navigator.of(
+                                    context,
+                                  ).pushNamed('/history'),
+                              icon: Icon(
+                                Icons.history,
+                                size: 18,
+                                color: theme.primaryColor,
+                              ),
+                              label: Text(
+                                'GEÇMİŞ OYUNLAR',
+                                style: TextStyle(
+                                  color: theme.primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
                           const SizedBox(height: 36),
                         ],
                       ),

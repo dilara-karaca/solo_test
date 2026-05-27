@@ -2,6 +2,7 @@ import 'package:solo_test/core/constants/app_constants.dart';
 import 'package:solo_test/models/board_state.dart';
 import 'package:solo_test/models/game_result.dart';
 import 'package:solo_test/models/game_theme_model.dart';
+import 'package:solo_test/repositories/game_history_repository.dart';
 import 'move_validator.dart';
 
 class GameEngine {
@@ -9,6 +10,7 @@ class GameEngine {
   List<Map<String, int>> moveHistory = [];
   DateTime? gameStartTime;
   GameTheme? currentTheme;
+  String? currentGameId;
 
   GameEngine({this.currentTheme})
     : boardState = BoardState.initial(AppConstants.BOARD_SIZE, theme: null);
@@ -18,6 +20,15 @@ class GameEngine {
     boardState = BoardState.initial(AppConstants.BOARD_SIZE, theme: theme);
     moveHistory = [];
     gameStartTime = DateTime.now();
+    // create a new history record (non-blocking)
+    try {
+      currentGameId = DateTime.now().millisecondsSinceEpoch.toString();
+      GameHistoryRepository().createNewGame(
+        boardState: boardState,
+        gameId: currentGameId,
+        theme: theme != null ? theme.toString().split('.').last : null,
+      );
+    } catch (_) {}
   }
 
   bool makeMove(int fromRow, int fromCol, int toRow, int toCol) {
@@ -80,7 +91,15 @@ class GameEngine {
     boardState = boardState.copyWith(
       board: newBoard,
       remainingPieces: remainingPegs,
+      moveHistory: moveHistory,
     );
+
+    // persist update (non-blocking)
+    try {
+      if (currentGameId != null) {
+        GameHistoryRepository().updateGameFromBoard(currentGameId!, boardState);
+      }
+    } catch (_) {}
 
     return true;
   }
@@ -128,6 +147,15 @@ class GameEngine {
       remainingPieces: remainingPegs,
     );
 
+    boardState = boardState.copyWith(moveHistory: moveHistory);
+
+    // persist update (non-blocking)
+    try {
+      if (currentGameId != null) {
+        GameHistoryRepository().updateGameFromBoard(currentGameId!, boardState);
+      }
+    } catch (_) {}
+
     return true;
   }
 
@@ -143,6 +171,17 @@ class GameEngine {
         gameStartTime != null
             ? DateTime.now().difference(gameStartTime!)
             : Duration.zero;
+    // update history status
+    try {
+      if (currentGameId != null) {
+        final status = remainingPieces == 1 ? 'won' : 'lost';
+        GameHistoryRepository().updateGameFromBoard(
+          currentGameId!,
+          boardState,
+          status: status,
+        );
+      }
+    } catch (_) {}
 
     return GameResult(
       remainingPieces: remainingPieces,

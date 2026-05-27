@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:solo_test/providers/theme_provider.dart';
-import 'package:solo_test/services/storage_service.dart';
+import 'package:solo_test/providers/stats_provider.dart';
 
 class StatsBar extends StatefulWidget {
   const StatsBar({super.key});
@@ -12,12 +12,9 @@ class StatsBar extends StatefulWidget {
 }
 
 class _StatsBarState extends State<StatsBar> {
-  late StorageService _storage;
-
   @override
   void initState() {
     super.initState();
-    _storage = StorageService();
   }
 
   @override
@@ -42,7 +39,7 @@ class _StatsBarState extends State<StatsBar> {
                 Expanded(
                   child: _StatItem(
                     label: 'EN İYİ',
-                    value: _storage.getBestScore().toString(),
+                    value: context.watch<StatsProvider>().bestScore.toString(),
                     icon: Icons.star_rounded,
                     color: const Color(0xFFF59E0B),
                     textColor: theme.textPrimary,
@@ -53,7 +50,8 @@ class _StatsBarState extends State<StatsBar> {
                 Expanded(
                   child: _StatItem(
                     label: 'OYUNLAR',
-                    value: _storage.getGamesPlayed().toString(),
+                    value:
+                        context.watch<StatsProvider>().gamesPlayed.toString(),
                     icon: Icons.sports_esports_rounded,
                     color: theme.primaryLight,
                     textColor: theme.textPrimary,
@@ -64,7 +62,10 @@ class _StatsBarState extends State<StatsBar> {
                 Expanded(
                   child: _StatItem(
                     label: 'ORTALAMA',
-                    value: _storage.getAverageScore().toStringAsFixed(0),
+                    value: context
+                        .watch<StatsProvider>()
+                        .averageScore
+                        .toStringAsFixed(0),
                     icon: Icons.trending_up_rounded,
                     color: theme.accentColor,
                     textColor: theme.textPrimary,

@@ -4,6 +4,10 @@ import 'package:provider/provider.dart';
 import 'package:solo_test/core/constants/app_constants.dart';
 import 'package:solo_test/core/constants/app_text_styles.dart';
 import 'package:solo_test/logic/game_engine.dart';
+import 'package:solo_test/repositories/game_history_repository.dart';
+import 'package:solo_test/services/storage_service.dart';
+import 'package:provider/provider.dart';
+import 'package:solo_test/providers/stats_provider.dart';
 import 'package:solo_test/models/game_theme_model.dart';
 import 'package:solo_test/providers/theme_provider.dart';
 import 'package:solo_test/widgets/particle_overlay.dart';
@@ -22,6 +26,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   int? selectedRow;
   int? selectedCol;
   List<List<bool>> validMoves = [];
+  bool _isResumed = false;
 
   // Celebration animation when piece is removed
   late AnimationController _celebCtrl;
@@ -39,8 +44,38 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     super.initState();
     final theme = context.read<ThemeProvider>().currentTheme;
     gameEngine = GameEngine(currentTheme: theme);
-    gameEngine.initializeGame(theme: theme);
+    // Don't call initializeGame immediately — wait until we know whether we're
+    // resuming an existing game. initializeGame creates a new GameHistory
+    // entry; calling it before checking resume args produced orphan in-progress
+    // entries. We'll initialize below when we know the navigation args.
     validMoves = _emptyMoves();
+
+    // If this screen was opened with resume args, load the saved board
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      if (args != null && args['resume'] == true && args['gameId'] != null) {
+        final gh = GameHistoryRepository().getGame(args['gameId']);
+        if (gh != null) {
+          final board = GameHistoryRepository().boardStateFromJson(
+            gh.boardJson,
+          );
+          setState(() {
+            gameEngine.boardState = board;
+            gameEngine.moveHistory = board.moveHistory;
+            gameEngine.currentGameId = gh.gameId;
+            validMoves = _emptyMoves();
+            _isResumed = true;
+          });
+        }
+      } else {
+        // No resume: start a new game and create its history record.
+        gameEngine.initializeGame(theme: theme);
+        setState(() {
+          validMoves = _emptyMoves();
+        });
+      }
+    });
 
     _celebCtrl = AnimationController(
       vsync: this,
@@ -87,8 +122,21 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     });
   }
 
-  void _showGameOverDialog() {
+  Future<void> _showGameOverDialog() async {
     final result = gameEngine.endGame();
+    // persist result for stats
+    try {
+      await StorageService().saveGameResult(result);
+      // Ensure any completed Hive history entries are imported so
+      // SharedPreferences and stats reflect the latest completed games.
+      try {
+        await StorageService().importCompletedFromHive();
+      } catch (_) {}
+      // refresh provider so top-bar updates
+      try {
+        await context.read<StatsProvider>().load();
+      } catch (_) {}
+    } catch (_) {}
     final theme = context.read<ThemeProvider>().themeData;
 
     showDialog(
@@ -234,8 +282,22 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                         height: 46,
                         child: TextButton.icon(
                           onPressed: () {
+                            // Close dialog
                             Navigator.pop(context);
-                            Navigator.pop(context);
+                            if (_isResumed) {
+                              // If this screen was opened to resume a game,
+                              // go to the main menu instead of returning to
+                              // the previous (History) screen.
+                              Navigator.pushNamedAndRemoveUntil(
+                                context,
+                                '/home',
+                                (route) => false,
+                              );
+                            } else {
+                              // Default: pop the game screen and return to
+                              // previous route.
+                              Navigator.pop(context);
+                            }
                           },
                           icon: Icon(
                             Icons.home_outlined,
